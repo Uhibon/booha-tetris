@@ -1,255 +1,294 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Booha Tetris – January Vocab</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Booha Tetris – Practice Deck</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
 
-<style>
-:root{
-  --pink:#ff7eb9;
-  --aqua:#7dd3fc;
-  --gold:#ffd166;
-  --dark:#020617;
-  --glow:0 0 14px rgba(255,255,255,0.9), 0 0 28px rgba(255,255,255,0.5);
-}
+  <style>
+    :root{
+      --bgDark:#050816;
+      --bgGlow:#0b1530;
+      --gold:#ffd166;
+      --pink:#ff7eb9;
+      --aqua:#7dd3fc;
+      --outline:rgba(255,255,255,0.35);
+    }
 
-*{box-sizing:border-box;margin:0;padding:0;}
-html,body{
-  width:100%;height:100%;overflow:hidden;
-  background:#000;
-  font-family:'Noto Sans JP', sans-serif;
-  color:#fff;
-}
+    *{ box-sizing:border-box; margin:0; padding:0; }
 
-.wrapper{
-  position:relative;
-  width:100%;
-  height:100%;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:flex-start;
-  padding-top:10px;
-}
+    html, body{
+      height:100%;
+      width:100%;
+      overflow:hidden;
+    }
 
-/* Pulsating Glow Background */
-.bg-glow{
-  position:absolute;
-  inset:0;
-  background:
-    radial-gradient(circle at 50% 30%, rgba(255,255,255,0.12), transparent 70%),
-    radial-gradient(circle at 20% 80%, rgba(255,128,192,0.15), transparent 65%),
-    radial-gradient(circle at 80% 20%, rgba(128,200,255,0.15), transparent 70%);
-  animation:pulse 6s ease-in-out infinite alternate;
-  z-index:-2;
-}
-@keyframes pulse{
-  0%{transform:scale(1);}
-  100%{transform:scale(1.05);}
-}
+    body{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:
+        radial-gradient(circle at top, #1f2937 0%, #020617 55%, #000 100%);
+      font-family:'Noto Sans JP','Cinzel',sans-serif;
+      color:#f9fafb;
+    }
 
-h1{
-  font-family:'Cinzel',serif;
-  font-weight:900;
-  text-align:center;
-  text-transform:uppercase;
-  letter-spacing:0.1em;
-  color:#fff;
-  text-shadow:var(--glow);
-  font-size:1.3rem;
-}
+    /* SHELL (unchanged) */
+    .shell{
+      position:relative;
+      padding:18px 22px 24px;
+      border-radius:24px;
+      background:radial-gradient(circle at top, rgba(148,163,255,0.25), rgba(15,23,42,0.98));
+      box-shadow:0 0 40px rgba(56,189,248,0.45), 0 0 80px rgba(248,250,252,0.08);
+      border:1px solid rgba(148,163,255,0.5);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+    }
 
-.sub{
-  font-size:0.85rem;
-  text-align:center;
-  letter-spacing:0.12em;
-  margin-bottom:10px;
-  color:#a5b4fc;
-}
+    .shell::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      border-radius:26px;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(236,72,153,0.27), transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(56,189,248,0.24), transparent 60%);
+      z-index:-1;
+      filter:blur(10px);
+      opacity:0.85;
+      animation:orbGlow 6s ease-in-out infinite alternate;
+    }
 
-.hud{
-  width:92%;
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:6px;
-  font-size:0.85rem;
-}
+    @keyframes orbGlow{
+      0%{transform:translate3d(-4px,-4px,0) scale(1);}
+      100%{transform:translate3d(4px,4px,0) scale(1.02);}
+    }
 
-.hud .count{
-  color:var(--gold);
-  text-shadow:0 0 6px rgba(255,225,100,0.9);
-}
+    /* TITLE */
+    h1{
+      font-family:'Cinzel',serif;
+      font-weight:900;
+      letter-spacing:0.12em;
+      font-size:1.05rem;
+      text-transform:uppercase;
+      text-align:center;
+      color:#e5e7eb;
+      text-shadow:
+        0 0 8px rgba(248,250,252,0.9),
+        0 0 16px rgba(251,113,133,0.8);
+    }
 
-.hud .nextq{
-  color:var(--pink);
-  text-shadow:0 0 6px rgba(255,120,160,0.9);
-}
+    h1 span{
+      display:block;
+      font-size:0.8rem;
+      letter-spacing:0.28em;
+      color:#a5b4fc;
+      margin-top:2px;
+    }
 
-/* Canvas */
-#game{
-  border-radius:20px;
-  background:#020617;
-  border:1px solid rgba(255,255,255,0.28);
-  box-shadow:
-    0 0 20px rgba(125,195,250,0.4),
-    0 0 40px rgba(255,128,190,0.3);
-}
+    /* HUD */
+    .hud{
+      width:100%;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-size:0.8rem;
+      color:#e5e7eb;
+      padding:4px 2px 0;
+    }
+    .hud span.value{ font-weight:700; color:var(--gold); text-shadow:0 0 6px rgba(250,204,21,0.9); }
+    .hud span.next{ color:var(--pink); text-shadow:0 0 6px rgba(248,113,113,0.9); }
 
-/* Pause Button */
-#pauseBtn{
-  position:absolute;
-  top:10px;right:10px;
-  width:38px;height:38px;
-  border-radius:50%;
-  background:linear-gradient(135deg,var(--aqua),var(--pink));
-  border:1px solid var(--gold);
-  box-shadow:0 0 12px rgba(255,255,255,0.6);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:20px;
-  cursor:pointer;
-  z-index:20;
-  animation:bob 3s ease-in-out infinite;
-}
-@keyframes bob{
-  0%{transform:translateY(0);}
-  50%{transform:translateY(-3px);}
-  100%{transform:translateY(0);}
-}
+    /* CANVAS */
+    canvas{
+      margin-top:8px;
+      border-radius:18px;
+      border:1px solid var(--outline);
+      background:radial-gradient(circle at top,#020617 0%,#000 50%,#020617 100%);
+      box-shadow:0 0 22px rgba(59,130,246,0.55), 0 0 50px rgba(15,23,42,0.9);
+      image-rendering:pixelated;
+    }
 
-/* Pause Overlay */
-#pauseOverlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,20,0.7);
-  backdrop-filter:blur(8px);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:50;
-  text-align:center;
-  font-size:1.2rem;
-  color:#fff;
-}
+    /* FLOATING BACKGROUND SPARKLES */
+    .sparkle-overlay{
+      pointer-events:none;
+      position:absolute;
+      inset:0;
+      overflow:hidden;
+      border-radius:24px;
+      mix-blend-mode:screen;
+      opacity:0.45;
+    }
+    .spark{
+      position:absolute;
+      width:3px;height:3px;
+      border-radius:50%;
+      background:radial-gradient(circle,#e5e7eb 0%,transparent 70%);
+      box-shadow:0 0 8px rgba(255,255,255,0.9);
+      animation:floatUp 8s linear infinite;
+    }
+    .spark:nth-child(2){animation-duration:10s;}
+    .spark:nth-child(3){animation-duration:12s;}
+    .spark:nth-child(4){animation-duration:9s;}
+    .spark:nth-child(5){animation-duration:11s;}
+    .spark:nth-child(6){animation-duration:13s;}
 
-#pauseOverlay div{
-  text-shadow:var(--glow);
-  font-family:'Cinzel',serif;
-  letter-spacing:0.1em;
-}
+    @keyframes floatUp{
+      0%{transform:translateY(120%) scale(0.6); opacity:0;}
+      20%{opacity:1;}
+      80%{opacity:1;}
+      100%{transform:translateY(-40%) scale(1.05); opacity:0;}
+    }
 
-/* Question Overlay */
-#questionOverlay{
-  position:fixed;
-  inset:0;
-  display:none;
-  background:rgba(0,0,20,0.8);
-  backdrop-filter:blur(8px);
-  z-index:60;
-  align-items:center;
-  justify-content:center;
-}
+    /* PAUSE BUTTON (minimal icon) */
+    #pauseBtn{
+      position:absolute;
+      top:8px; right:8px;
+      width:34px; height:34px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:20px;
+      background:linear-gradient(135deg,var(--aqua),var(--pink));
+      border:1px solid var(--gold);
+      box-shadow:0 0 12px rgba(255,255,255,0.7);
+      cursor:pointer;
+      z-index:10;
+    }
 
-.q-box{
-  width:90%;
-  max-width:380px;
-  background:radial-gradient(circle at top,#111827,#020617 70%);
-  border-radius:20px;
-  border:1px solid rgba(255,255,255,0.25);
-  padding:18px;
-  text-align:center;
-  box-shadow:
-    0 0 30px rgba(255,120,160,0.6),
-    0 0 40px rgba(125,200,255,0.4);
-}
+    /* PAUSE OVERLAY */
+    #pauseOverlay{
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,0.6);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      border-radius:24px;
+      z-index:20;
+      font-size:1rem;
+      color:#fff;
+      text-shadow:0 0 6px rgba(255,255,255,0.9);
+    }
+    #pauseOverlay span{
+      font-family:'Noto Sans JP';
+      letter-spacing:0.1em;
+    }
 
-.q-box h2{
-  font-family:'Cinzel',serif;
-  font-size:1.1rem;
-  text-transform:uppercase;
-  margin-bottom:10px;
-  letter-spacing:0.12em;
-}
-
-#continueBtn{
-  width:100%;
-  padding:10px;
-  border-radius:999px;
-  background:linear-gradient(125deg,#f97316,#fb7185,#e879f9);
-  border:none;
-  font-weight:700;
-  letter-spacing:0.1em;
-  cursor:pointer;
-  margin-top:14px;
-}
-
-.sparkle{
-  position:absolute;
-  width:4px;height:4px;
-  background:#fff;
-  border-radius:50%;
-  opacity:0.9;
-}
-
-</style>
+    /* QUESTION OVERLAY (unchanged) */
+    #questionOverlay{
+      position:fixed; inset:0;
+      background:rgba(0,0,20,0.82);
+      backdrop-filter:blur(8px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:50;
+    }
+    .q-card{
+      width:min(92vw,420px);
+      border-radius:20px;
+      padding:20px;
+      background:radial-gradient(circle,#111827,#020617 60%);
+      border:1px solid rgba(248,250,252,0.25);
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="bg-glow"></div>
+<div class="shell">
 
-<div class="wrapper">
+  <h1>Booha Tetris <span>LINES → QUESTIONS</span></h1>
 
+  <!-- PAUSE BUTTON -->
   <div id="pauseBtn">⏸</div>
 
-  <h1>Booha Tetris</h1>
-  <div class="sub">January Vocab ／ １月の単語</div>
-
+  <!-- HUD -->
   <div class="hud">
-    <div>ライン数：<span id="lineCount" class="count">0</span></div>
-    <div>次のクイズ：<span id="nextQ" class="nextq">10</span> ライン目</div>
+    <div>Lines: <span class="value" id="linesCount">0</span></div>
+    <div>Next Question at <span class="next" id="nextAt">10</span> lines</div>
   </div>
 
+  <!-- GAME -->
   <canvas id="game" width="320" height="640"></canvas>
 
+  <!-- FLOATING SPARKLES -->
+  <div class="sparkle-overlay">
+    <div class="spark" style="left:10%;"></div>
+    <div class="spark" style="left:30%;"></div>
+    <div class="spark" style="left:50%;"></div>
+    <div class="spark" style="left:70%;"></div>
+    <div class="spark" style="left:85%;"></div>
+    <div class="spark" style="left:42%;"></div>
+  </div>
+
+  <!-- PAUSE OVERLAY -->
+  <div id="pauseOverlay">
+    <span>タップしてゲームに戻る</span>
+  </div>
+
 </div>
 
-<!-- Pause Screen -->
-<div id="pauseOverlay">
-  <div>PAUSED ／ 一時停止中<br><br>▶ をタップして続ける</div>
-</div>
-
-<!-- Question Overlay -->
+<!-- QUESTION OVERLAY -->
 <div id="questionOverlay">
-  <div class="q-box">
-    <h2>Checkpoint</h2>
-    <div id="qtext">Question placeholder...</div>
+  <div class="q-card">
+    <div class="q-title">Checkpoint</div>
+    <div class="q-sub">Booha Question Gate</div>
+    <div id="questionText"></div>
     <button id="continueBtn">Continue</button>
   </div>
 </div>
 
 <script>
-/* ============================================================
-   AUDIO SETUP
-   ============================================================ */
-
+/* -----------------------------------------
+   AUDIO
+------------------------------------------*/
 const bgm = new Audio("booha-tetris-january.mp3");
 bgm.loop = true;
 bgm.volume = 0.55;
 
-const clearSFX = new Audio("booha-tetris-sound.mp3");
-clearSFX.volume = 0.9;
+const sfx = new Audio("booha-tetris-sound.mp3");
+sfx.volume = 1;
 
+/* -----------------------------------------
+   PAUSE SYSTEM
+------------------------------------------*/
+let paused = false;
+const pauseBtn = document.getElementById("pauseBtn");
+const pauseOverlay = document.getElementById("pauseOverlay");
 
-/* ============================================================
-   BASIC TETRIS ENGINE (same as your previous version, modified)
-   ============================================================ */
+pauseBtn.addEventListener("click", () => {
+  paused = true;
+  pauseOverlay.style.display = "flex";
+  bgm.volume = 0.3;
+});
 
-function getRandomInt(min, max){
-  min = Math.ceil(min);
-  max = Math.floor(max);
+pauseOverlay.addEventListener("click", () => {
+  paused = false;
+  pauseOverlay.style.display = "none";
+  bgm.volume = 0.55;
+});
+
+/* -----------------------------------------
+   TOUCH START TO ENABLE BGM (iOS rule)
+------------------------------------------*/
+document.addEventListener("touchstart", () => {
+  if (bgm.paused) bgm.play();
+}, { once:true });
+
+document.addEventListener("mousedown", () => {
+  if (bgm.paused) bgm.play();
+}, { once:true });
+
+/* -----------------------------------------
+   TETRIS LOGIC (unchanged except triggers)
+------------------------------------------*/
+function getRandomInt(min,max){
   return Math.floor(Math.random()*(max-min+1))+min;
 }
 
@@ -257,57 +296,46 @@ const tetrominoSequence=[];
 function generateSequence(){
   const seq=['I','J','L','O','S','T','Z'];
   while(seq.length){
-    const r=getRandomInt(0,seq.length-1);
-    tetrominoSequence.push(seq.splice(r,1)[0]);
+    tetrominoSequence.push(seq.splice(getRandomInt(0,seq.length-1),1)[0]);
   }
 }
 
 function getNextTetromino(){
-  if(tetrominoSequence.length===0) generateSequence();
+  if(!tetrominoSequence.length) generateSequence();
   const name=tetrominoSequence.pop();
   const matrix=tetrominos[name];
-  const col=playfield[0].length/2 - Math.ceil(matrix[0].length/2);
+  const col=5 - Math.ceil(matrix[0].length/2);
   const row=name==='I'?-1:-2;
-  return {name,matrix,row,col};
+  return { name, matrix, row, col };
 }
 
 function rotate(matrix){
   const N=matrix.length-1;
-  return matrix.map((row,i)=>
-    row.map((val,j)=>matrix[N-j][i])
-  );
+  return matrix.map((row,i)=> row.map((v,j)=>matrix[N-j][i]) );
 }
 
-function isValidMove(matrix,cellRow,cellCol){
+function isValidMove(matrix,row,col){
   for(let r=0;r<matrix.length;r++){
     for(let c=0;c<matrix[r].length;c++){
       if(matrix[r][c] && (
-        cellCol+c<0 ||
-        cellCol+c>=playfield[0].length ||
-        cellRow+r>=playfield.length ||
-        playfield[cellRow+r][cellCol+c]
-      )){
-        return false;
-      }
+        col+c<0 || col+c>=10 || row+r>=20 ||
+        playfield[row+r][col+c]
+      )) return false;
     }
   }
   return true;
 }
 
-/* ============================================================
-   PLAYFIELD + TETROMINOS
-   ============================================================ */
-
+/* -----------------------------------------
+   PLAYFIELD + COLORS
+------------------------------------------*/
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 const grid=32;
 
 const playfield=[];
-for(let r=-2;r<20;r++){
-  playfield[r]=[];
-  for(let c=0;c<10;c++){
-    playfield[r][c]=0;
-  }
+for(let r=0;r<20;r++){
+  playfield[r]=Array(10).fill(0);
 }
 
 const tetrominos={
@@ -321,77 +349,25 @@ const tetrominos={
 };
 
 const colors={
-  'I':'#7dd3fc','O':'#facc15','T':'#e879f9','S':'#4ade80',
-  'Z':'#fb7185','J':'#a855f7','L':'#f97316'
+  'I':'#7dd3fc',
+  'O':'#facc15',
+  'T':'#e879f9',
+  'S':'#4ade80',
+  'Z':'#fb7185',
+  'J':'#a855f7',
+  'L':'#f97316'
 };
 
-let tetromino=getNextTetromino();
-let count=0;
-let gameOver=false;
-let paused=false;
-let isQuestion=false;
-
-let linesCleared=0;
-let nextThreshold=10;
-
-const lineCountEl=document.getElementById("lineCount");
-const nextQEl=document.getElementById("nextQ");
-
-function placeTetromino(){
-  for(let r=0;r<tetromino.matrix.length;r++){
-    for(let c=0;c<tetromino.matrix[r].length;c++){
-      if(tetromino.matrix[r][c]){
-        if(tetromino.row+r<0){
-          showGameOver();
-          return;
-        }
-        playfield[tetromino.row+r][tetromino.col+c]=tetromino.name;
-      }
-    }
-  }
-
-  let cleared=0;
-  for(let r=19;r>=0;){
-    if(playfield[r].every(cell=>!!cell)){
-      cleared++;
-      clearLine(r);
-      for(let rr=r;rr>=0;rr--){
-        for(let cc=0;cc<10;cc++){
-          playfield[rr][cc]=playfield[rr-1]?.[cc] || 0;
-        }
-      }
-    }else r--;
-  }
-
-  if(cleared>0){
-    linesCleared+=cleared;
-    lineCountEl.textContent=linesCleared;
-    clearSFX.currentTime=0;
-    clearSFX.play();
-
-    glitterBurst();
-
-    if(linesCleared>=nextThreshold){
-      triggerQuestion();
-      nextThreshold+=10;
-      nextQEl.textContent=nextThreshold;
-    }
-  }
-
-  tetromino=getNextTetromino();
-}
-
-/* ============================================================
-   Glitter Burst Animation
-   ============================================================ */
+/* -----------------------------------------
+   PARTICLE GLITTER UPGRADE
+------------------------------------------*/
 const particles=[];
-
-function glitterBurst(){
-  for(let i=0;i<50;i++){
+function glitterBurst(row){
+  for(let i=0;i<40;i++){
     particles.push({
-      x:160,y:320,
-      vx:(Math.random()-0.5)*6,
-      vy:(Math.random()-0.5)*6,
+      x:160, y:row*grid+grid/2,
+      vx:(Math.random()-0.5)*5,
+      vy:(Math.random()-0.5)*5,
       life:30+Math.random()*20,
       alpha:1
     });
@@ -400,13 +376,13 @@ function glitterBurst(){
 
 function updateParticles(){
   for(let i=particles.length-1;i>=0;i--){
-    const p=particles[i];
+    let p=particles[i];
     p.x+=p.vx;
     p.y+=p.vy;
     p.vy+=0.1;
     p.life--;
     p.alpha-=0.02;
-    if(p.life<=0 || p.alpha<=0){
+    if(p.life<=0){
       particles.splice(i,1);
       continue;
     }
@@ -418,137 +394,131 @@ function updateParticles(){
   }
 }
 
-/* ============================================================
-   Question Checkpoint System
-   ============================================================ */
+/* -----------------------------------------
+   QUESTION SYSTEM EVERY 10 LINES
+------------------------------------------*/
+let linesCleared=0;
+let nextQ=10;
+const linesEl=document.getElementById("linesCount");
+const nextEl=document.getElementById("nextAt");
 
-const questionOverlay=document.getElementById("questionOverlay");
-const qtext=document.getElementById("qtext");
-const continueBtn=document.getElementById("continueBtn");
+const qOverlay=document.getElementById("questionOverlay");
+const qText=document.getElementById("questionText");
+const contBtn=document.getElementById("continueBtn");
 
 function triggerQuestion(){
   paused=true;
-  isQuestion=true;
-  questionOverlay.style.display="flex";
-  qtext.textContent="Placeholder Question — January Vocab";
-  bgm.volume=0.3;
+  qOverlay.style.display="flex";
+  qText.textContent="Placeholder Question";
 }
 
-continueBtn.onclick=()=>{
-  isQuestion=false;
+contBtn.onclick=()=>{
   paused=false;
-  questionOverlay.style.display="none";
-  bgm.volume=0.55;
+  qOverlay.style.display="none";
 };
 
-/* ============================================================
-   Game Over
-   ============================================================ */
+/* -----------------------------------------
+   PLACE TETROMINO
+------------------------------------------*/
+let tetromino=getNextTetromino();
+let frame=0;
 
-function showGameOver(){
-  gameOver=true;
-  paused=true;
+function placeTetromino(){
+  for(let r=0;r<tetromino.matrix.length;r++){
+    for(let c=0;c<tetromino.matrix[r].length;c++){
+      if(tetromino.matrix[r][c]){
+        playfield[tetromino.row+r][tetromino.col+c]=tetromino.name;
+      }
+    }
+  }
 
-  ctx.fillStyle="rgba(0,0,0,0.6)";
-  ctx.fillRect(0,canvas.height/2-40,canvas.width,80);
+  let cleared=0;
+  for(let r=19;r>=0;r--){
+    if(playfield[r].every(v=>v)){
+      glitterBurst(r);
+      sfx.currentTime=0;
+      sfx.play();
+      cleared++;
+      for(let rr=r;rr>0;rr--){
+        playfield[rr]=[...playfield[rr-1]];
+      }
+    }
+  }
 
-  ctx.fillStyle="#fff";
-  ctx.font="28px Cinzel";
-  ctx.textAlign="center";
-  ctx.fillText("GAME OVER",canvas.width/2,canvas.height/2);
+  if(cleared){
+    linesCleared+=cleared;
+    linesEl.textContent=linesCleared;
+    if(linesCleared>=nextQ){
+      triggerQuestion();
+      nextQ+=10;
+      nextEl.textContent=nextQ;
+    }
+  }
 
-  bgm.volume=0.2;
+  tetromino=getNextTetromino();
 }
 
-/* ============================================================
-   Pause Button
-   ============================================================ */
-const pauseBtn=document.getElementById("pauseBtn");
-const pauseOverlay=document.getElementById("pauseOverlay");
-
-pauseBtn.onclick=()=>{
-  if(paused){
-    paused=false;
-    pauseOverlay.style.display="none";
-    pauseBtn.textContent="⏸";
-    bgm.volume=0.55;
-  }else{
-    paused=true;
-    pauseOverlay.style.display="flex";
-    pauseBtn.textContent="▶";
-    bgm.volume=0.35;
-  }
-};
-
-/* ============================================================
-   Mobile Touch Controls
-   ============================================================ */
-
-let touchStartX=0;
-let touchStartY=0;
+/* -----------------------------------------
+   MOBILE TOUCH CONTROLS
+------------------------------------------*/
+let startX=0, startY=0;
 
 canvas.addEventListener("touchstart",e=>{
   const t=e.touches[0];
-  touchStartX=t.clientX;
-  touchStartY=t.clientY;
-
-  // Start BGM on first touch (iOS requirement)
-  if(bgm.paused){ bgm.play(); }
+  startX=t.clientX;
+  startY=t.clientY;
 });
 
 canvas.addEventListener("touchmove",e=>{
-  if(paused || gameOver) return;
-
+  if(paused) return;
   const t=e.touches[0];
-  const dx=t.clientX - touchStartX;
-  const dy=t.clientY - touchStartY;
+  const dx=t.clientX-startX;
+  const dy=t.clientY-startY;
 
-  // Horizontal drag → move
   if(Math.abs(dx)>20){
-    const dir = dx>0?1:-1;
-    const col = tetromino.col + dir;
-    if(isValidMove(tetromino.matrix,tetromino.row,col)){
-      tetromino.col=col;
-      touchStartX=t.clientX;
+    const dir=dx>0?1:-1;
+    const newCol=tetromino.col+dir;
+    if(isValidMove(tetromino.matrix,tetromino.row,newCol)){
+      tetromino.col=newCol;
+      startX=t.clientX;
     }
   }
 
-  // Vertical swipe
-  if(dy<-40){ // swipe up
-    const rot = rotate(tetromino.matrix);
+  if(dy<-40){
+    const rot=rotate(tetromino.matrix);
     if(isValidMove(rot,tetromino.row,tetromino.col)){
       tetromino.matrix=rot;
-      touchStartY=t.clientY;
+      startY=t.clientY;
     }
   }
 
-  if(dy>40){ // swipe down
-    const r=tetromino.row+1;
-    if(!isValidMove(tetromino.matrix,r,tetromino.col)){
-      tetromino.row=r-1;
+  if(dy>40){
+    const newRow=tetromino.row+1;
+    if(isValidMove(tetromino.matrix,newRow,tetromino.col)){
+      tetromino.row=newRow;
+      startY=t.clientY;
+    } else {
+      tetromino.row=newRow-1;
       placeTetromino();
-      return;
     }
-    tetromino.row=r;
-    touchStartY=t.clientY;
   }
 });
 
-/* ============================================================
-   Keyboard Controls (desktop)
-   ============================================================ */
+/* -----------------------------------------
+   KEYBOARD CONTROLS
+------------------------------------------*/
 document.addEventListener("keydown",e=>{
-  if(gameOver||paused||isQuestion) return;
+  if(paused) return;
 
   if(e.key==="ArrowLeft"){
-    const c=tetromino.col-1;
-    if(isValidMove(tetromino.matrix,tetromino.row,c))
-      tetromino.col=c;
+    const nc=tetromino.col-1;
+    if(isValidMove(tetromino.matrix,tetromino.row,nc))
+      tetromino.col=nc;
   }
   if(e.key==="ArrowRight"){
-    const c=tetromino.col+1;
-    if(isValidMove(tetromino.matrix,tetromino.row,c))
-      tetromino.col=c;
+    const nc=tetromino.col+1;
+    if(isValidMove(tetromino.matrix,tetromino.row,nc))
+      tetromino.col=nc;
   }
   if(e.key==="ArrowUp"){
     const rot=rotate(tetromino.matrix);
@@ -556,27 +526,24 @@ document.addEventListener("keydown",e=>{
       tetromino.matrix=rot;
   }
   if(e.key==="ArrowDown"){
-    const r=tetromino.row+1;
-    if(!isValidMove(tetromino.matrix,r,tetromino.col)){
-      tetromino.row=r-1;
+    const nr=tetromino.row+1;
+    if(isValidMove(tetromino.matrix,nr,tetromino.col)){
+      tetromino.row=nr;
+    } else {
+      tetromino.row=nr-1;
       placeTetromino();
-      return;
     }
-    tetromino.row=r;
   }
-
-  if(bgm.paused) bgm.play();
 });
 
-/* ============================================================
+/* -----------------------------------------
    MAIN GAME LOOP
-   ============================================================ */
-
+------------------------------------------*/
 function loop(){
   requestAnimationFrame(loop);
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(paused) return;
 
-  if(gameOver || paused) return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
   // Draw playfield
   for(let r=0;r<20;r++){
@@ -584,24 +551,23 @@ function loop(){
       if(playfield[r][c]){
         ctx.fillStyle=colors[playfield[r][c]];
         ctx.fillRect(c*grid,r*grid,grid-1,grid-1);
-      }else{
-        ctx.fillStyle="rgba(255,255,255,0.06)";
+      } else {
+        ctx.fillStyle="rgba(255,255,255,0.05)";
         ctx.fillRect(c*grid,r*grid,grid-1,grid-1);
       }
     }
   }
 
-  // Particles
   updateParticles();
 
-  // Tetromino falling
-  if(++count>35){
-    const r=tetromino.row+1;
-    count=0;
-    if(!isValidMove(tetromino.matrix,r,tetromino.col)){
-      tetromino.row=r-1;
+  if(++frame>35){
+    const nr=tetromino.row+1;
+    frame=0;
+    if(isValidMove(tetromino.matrix,nr,tetromino.col)){
+      tetromino.row=nr;
+    } else {
       placeTetromino();
-    }else tetromino.row=r;
+    }
   }
 
   // Draw tetromino
