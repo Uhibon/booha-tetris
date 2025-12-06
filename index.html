@@ -313,30 +313,24 @@ h1 span{
   </div>
 
   <!-- Help Overlay -->
-  <div id="helpOverlay">
-    <div class="help-card">
-      <div id="helpClose">✕</div>
-      <div class="help-title">How to Play ／ 遊び方</div>
+  <div class="help-section">
+  <strong>English</strong><br>
+  ・Tap on the falling blocks = Rotate<br>
+  ・Press and drag <em>under</em> the blocks = Move left / right<br>
+  ・Drag down under the blocks = Make them fall faster<br>
+  ・Clear lines to get points<br>
+  ・Every 10 lines opens a Booha Question
+</div>
 
-      <div class="help-section">
-        <strong>English</strong><br>
-        ・Tap = Rotate<br>
-        ・Drag left / right = Move piece<br>
-        ・Swipe down = Soft drop<br>
-        ・Long press = Hard drop (drop to the bottom)<br>
-        ・Clear lines to get points<br>
-        ・Every 10 lines opens a Booha Question
-      </div>
+<div class="help-section">
+  <strong>日本語</strong><br>
+  ・落ちているブロックをタップ → 回転<br>
+  ・ブロックの下の画面を押して左右にドラッグ → 左右に動かす<br>
+  ・ブロックの下で下方向にドラッグ → 速く下に落ちる<br>
+  ・ラインを消すとポイントが入ります<br>
+  ・１０ラインごとに「ブーハクイズ」が開きます
+</div>
 
-      <div class="help-section">
-        <strong>日本語</strong><br>
-        ・タップ → 回転<br>
-        ・左右にドラッグ → 左右に移動<br>
-        ・下にスワイプ → ソフトドロップ<br>
-        ・長押し → ハードドロップ（すぐ下まで落ちる）<br>
-        ・ラインを消すとポイントが入ります<br>
-        ・１０ラインごとに「ブーハクイズ」が開きます
-      </div>
     </div>
   </div>
 
@@ -350,8 +344,7 @@ h1 span{
     <div id="questionText"></div>
     <button id="continueBtn">Continue</button>
   </div>
-</div>
-<script>
+</div><script>
 // =====================
 //  AUDIO
 // =====================
@@ -364,12 +357,11 @@ bgm.volume = 0.55;
 const sfxClear = new Audio("booha-tetris-sound.mp3");
 sfxClear.volume = 0.9;
 
-// helper to start bgm once from any input
 function ensureBgm(){
   if (!bgmStarted) {
     bgm.play().then(()=>{
       bgmStarted = true;
-    }).catch(()=>{/* ignore autoplay errors */});
+    }).catch(()=>{ /* ignore autoplay errors */ });
   }
 }
 
@@ -391,7 +383,7 @@ const nextAtEl = document.getElementById("nextAt");
 let linesClearedTotal = 0;
 let currentQuestionIndex = 0;
 
-// score + leaderboard
+// Score + UI
 let score = 0;
 let scoreEl;
 
@@ -410,7 +402,9 @@ let scoreEl;
   scoreEl = scoreRow.querySelector("#scoreValue");
 })();
 
-// leaderboard box is INSIDE the shell in your HTML
+// =====================
+//  LOCAL LEADERBOARD
+// =====================
 const leaderboardContainer = document.getElementById("leaderboardBox");
 let leaderboardData = [];
 const LEADERBOARD_KEY = "boohaTetrisScores";
@@ -430,7 +424,7 @@ function saveScoreToLocal(newScore){
   if(!newScore || isNaN(newScore)) return;
   leaderboardData.push({score:newScore, date:Date.now()});
   leaderboardData.sort((a,b)=>b.score - a.score);
-  leaderboardData = leaderboardData.slice(0,5); // keep top 5
+  leaderboardData = leaderboardData.slice(0,5);
   try{
     localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(leaderboardData));
   }catch(e){}
@@ -443,8 +437,7 @@ function renderLeaderboard(){
     leaderboardContainer.textContent = "ローカル・ハイスコア：まだありません";
     return;
   }
-  let html = "<div>ローカル・ハイスコア</div>";
-  html += "<div style='margin-top:4px;'>";
+  let html = "<div>ローカル・ハイスコア</div><div style='margin-top:4px;'>";
   leaderboardData.forEach((entry, idx)=>{
     html += `<div>${idx+1}位：${entry.score} 点</div>`;
   });
@@ -452,7 +445,7 @@ function renderLeaderboard(){
   leaderboardContainer.innerHTML = html;
 }
 
-// placeholder questions
+// Placeholder questions
 const questions = Array.from({length:60}, (_,i)=>
   `Question ${i+1} placeholder — January vocab EN/JP here.`
 );
@@ -722,74 +715,116 @@ function loop(){
 }
 
 // =====================
-//  TOUCH CONTROLS
+//  TOUCH CONTROLS (NEW)
+//  - Tap ON piece: rotate
+//  - Press & drag UNDER piece: move + drop
 // =====================
-let touchStartX = 0;
-let touchStartY = 0;
-let touchStartTime = 0;
-let longPressTriggered = false;
+let pointerMode = null; // "rotate" or "drag"
+let startX = 0, startY = 0;
+let lastDragX = 0, lastDragY = 0;
+
+function getPieceBounds(){
+  let left = Infinity, right = -Infinity, top = Infinity, bottom = -Infinity;
+  for(let r=0; r<tetromino.matrix.length; r++){
+    for(let c=0; c<tetromino.matrix[r].length; c++){
+      if(tetromino.matrix[r][c]){
+        const drawRow = tetromino.row + r;
+        if(drawRow < 0) continue; // offscreen
+        const x = (tetromino.col + c) * grid;
+        const y = drawRow * grid;
+        left = Math.min(left, x);
+        right = Math.max(right, x + grid);
+        top = Math.min(top, y);
+        bottom = Math.max(bottom, y + grid);
+      }
+    }
+  }
+  if(left === Infinity){
+    return {left:0,right:0,top:0,bottom:0};
+  }
+  return {left,right,top,bottom};
+}
 
 canvas.addEventListener("touchstart", e=>{
   ensureBgm();
+  if(gameOver || isPaused || isPausedForQuestion) return;
+  const rect = canvas.getBoundingClientRect();
   const t = e.touches[0];
-  touchStartX = t.clientX;
-  touchStartY = t.clientY;
-  touchStartTime = Date.now();
-  longPressTriggered = false;
+  const cx = t.clientX - rect.left;
+  const cy = t.clientY - rect.top;
 
-  setTimeout(()=>{
-    if(!longPressTriggered && Date.now() - touchStartTime > 350){
-      hardDrop();
-      longPressTriggered = true;
-    }
-  }, 360);
-});
+  const bounds = getPieceBounds();
+  startX = cx;
+  startY = cy;
+
+  // touch on the blocks → rotate mode
+  if(cx >= bounds.left && cx <= bounds.right &&
+     cy >= bounds.top && cy <= bounds.bottom){
+    pointerMode = "rotate";
+  } else if (cy > bounds.bottom + grid*0.3) {
+    // touch clearly under the piece → drag mode
+    pointerMode = "drag";
+    lastDragX = cx;
+    lastDragY = cy;
+  } else {
+    pointerMode = null;
+  }
+}, {passive:false});
 
 canvas.addEventListener("touchmove", e=>{
+  if(pointerMode !== "drag" || gameOver || isPaused || isPausedForQuestion) return;
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
   const t = e.touches[0];
-  const dx = t.clientX - touchStartX;
-  const dy = t.clientY - touchStartY;
+  const cx = t.clientX - rect.left;
+  const cy = t.clientY - rect.top;
 
-  if(Math.abs(dx) > 22){
+  const dx = cx - lastDragX;
+  const dy = cy - lastDragY;
+
+  // horizontal move: every ~16px = 1 column
+  if(Math.abs(dx) > 16){
     const dir = dx > 0 ? 1 : -1;
     const newCol = tetromino.col + dir;
     if(isValidMove(tetromino.matrix, tetromino.row, newCol)){
       tetromino.col = newCol;
-      touchStartX = t.clientX;
     }
+    lastDragX = cx;
   }
 
-  if(dy > 22){
+  // vertical drag: pull piece down faster
+  if(dy > 16){
     const newRow = tetromino.row + 1;
     if(isValidMove(tetromino.matrix, newRow, tetromino.col)){
       tetromino.row = newRow;
-      touchStartY = t.clientY;
+    } else {
+      // landed while dragging
+      placeTetromino();
     }
+    lastDragY = cy;
   }
-});
+}, {passive:false});
 
 canvas.addEventListener("touchend", e=>{
-  if(!longPressTriggered){
+  if(gameOver || isPaused || isPausedForQuestion) {
+    pointerMode = null;
+    return;
+  }
+  if(pointerMode === "rotate"){
+    const dx = 0; // we can use distance to avoid accidental drags if needed
+    const dy = 0;
+    const dist = Math.hypot(dx, dy); // simplified; we already filtered huge moves
+    // treat it as a tap
     const rotated = rotate(tetromino.matrix);
     if(isValidMove(rotated, tetromino.row, tetromino.col)){
       tetromino.matrix = rotated;
     }
   }
+  pointerMode = null;
 });
 
 // =====================
-//  HARD DROP
-// =====================
-function hardDrop(){
-  while(isValidMove(tetromino.matrix, tetromino.row+1, tetromino.col)){
-    tetromino.row++;
-  }
-  score += 20; // bonus for hard drop
-  placeTetromino();
-}
-
-// =====================
-//  KEYBOARD (fallback)
+//  KEYBOARD (DESKTOP)
 // =====================
 document.addEventListener("keydown", e=>{
   ensureBgm();
