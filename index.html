@@ -124,6 +124,7 @@ h1 span{
   color:var(--pink);
   text-shadow:0 0 6px #ff7eb9;
 }
+
 /* Mobile rotate button */
 #rotateBtn{
   position:absolute;
@@ -162,7 +163,6 @@ h1 span{
   image-rendering:pixelated;
   touch-action:none; /* prevent double-tap zoom / gestures on canvas */
 }
-
 
 /* FLOATING SPARKLES */
 .sparkle-overlay{
@@ -344,7 +344,6 @@ h1 span{
     height: 560px; /* shrink canvas to fit mobile screens */
   }
 }
-
 </style>
 </head>
 <body>
@@ -404,25 +403,23 @@ h1 span{
 
       <div class="help-section">
         <strong>English</strong><br>
-        ・Tap on the falling blocks = Rotate<br>
-        ・Press and drag <em>under</em> the blocks = Move left / right<br>
-        ・Drag down under the blocks = Make them fall faster<br>
+        ・Drag the falling blocks with your finger = move left / right / down<br>
+        ・Tap the glowing ↻ button (bottom-right) = rotate the piece<br>
         ・Clear lines to get points<br>
         ・Every 10 lines opens a Booha Question
       </div>
 
       <div class="help-section">
         <strong>日本語</strong><br>
-        ・落ちているブロックをタップ → 回転<br>
-        ・ブロックの下の画面を押して左右にドラッグ → 左右に動かす<br>
-        ・ブロックの下で下方向にドラッグ → 速く下に落ちる<br>
+        ・落ちているブロックを指でドラッグ → 左右・下に動かす<br>
+        ・右下の光る「↻」ボタン → ブロックを回転<br>
         ・ラインを消すとポイントが入ります<br>
         ・１０ラインごとに「ブーハクイズ」が開きます
       </div>
     </div>
   </div>
 
-    <!-- Local leaderboard (inside shell) -->
+  <!-- Local leaderboard (inside shell) -->
   <div id="leaderboardBox">
     ローカル・ハイスコア：まだありません
   </div>
@@ -649,6 +646,7 @@ function updateParticles(){
 // HUD & QUESTIONS & SCORE
 // =====================
 function updateHud(){
+  linesClearedTotal = Math.max(0, linesClearedTotal);
   linesCountEl.textContent = linesClearedTotal;
   nextAtEl.textContent = (currentQuestionIndex+1)*10;
   scoreEl.textContent = score;
@@ -881,8 +879,9 @@ canvas.addEventListener("touchend", ()=>{
   draggingPiece = false;
 });
 
-  
-// Rotate button (mobile)
+// =====================
+// ROTATE BUTTON (MOBILE)
+// =====================
 const rotateBtn = document.getElementById("rotateBtn");
 if(rotateBtn){
   const doRotate = () => {
@@ -899,47 +898,6 @@ if(rotateBtn){
     doRotate();
   }, {passive:false});
 }
-
-  // Horizontal movement: every ~12px → move 1 column
-  const stepX = 12;
-  while(dragAccumX > stepX){
-    const newCol = tetromino.col + 1;
-    if(isValidMove(tetromino.matrix, tetromino.row, newCol)){
-      tetromino.col = newCol;
-    }
-    dragAccumX -= stepX;
-  }
-  while(dragAccumX < -stepX){
-    const newCol = tetromino.col - 1;
-    if(isValidMove(tetromino.matrix, tetromino.row, newCol)){
-      tetromino.col = newCol;
-    }
-    dragAccumX += stepX;
-  }
-
-  // Vertical movement: drag down faster
-  const stepY = 14;
-  while(dragAccumY > stepY){
-    const newRow = tetromino.row + 1;
-    if(isValidMove(tetromino.matrix, newRow, tetromino.col)){
-      tetromino.row = newRow;
-    }else{
-      // landed while dragging
-      placeTetromino();
-      pointerMode = null;
-      break;
-    }
-    dragAccumY -= stepY;
-  }
-
-  e.preventDefault();
-},{passive:false});
-
-canvas.addEventListener("touchend", ()=>{
-  pointerMode = null;
-});
-
-
 
 // =====================
 // KEYBOARD (DESKTOP)
