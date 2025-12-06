@@ -307,9 +307,15 @@ h1 span{
 /* MOBILE SCALE */
 @media(max-width:600px){
   .shell{
-    transform:scale(0.9);
+    transform:scale(0.83);
+    transform-origin: top center;
+    max-height: 88vh;
+  }
+  #game{
+    height: 560px; /* shrink canvas to fit mobile screens */
   }
 }
+
 </style>
 </head>
 <body>
