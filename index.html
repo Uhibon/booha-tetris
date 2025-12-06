@@ -410,17 +410,10 @@ let scoreEl;
   scoreEl = scoreRow.querySelector("#scoreValue");
 })();
 
-// local leaderboard under the phone
+// leaderboard box is INSIDE the shell in your HTML
+const leaderboardContainer = document.getElementById("leaderboardBox");
 let leaderboardData = [];
 const LEADERBOARD_KEY = "boohaTetrisScores";
-
-const leaderboardContainer = document.createElement("div");
-leaderboardContainer.style.marginTop = "12px";
-leaderboardContainer.style.fontSize = "0.75rem";
-leaderboardContainer.style.textAlign = "center";
-leaderboardContainer.style.color = "#e5e7eb";
-leaderboardContainer.style.fontFamily = '"Noto Sans JP",sans-serif';
-document.body.appendChild(leaderboardContainer);
 
 function loadScores(){
   try{
@@ -445,8 +438,9 @@ function saveScoreToLocal(newScore){
 }
 
 function renderLeaderboard(){
+  if(!leaderboardContainer) return;
   if(!leaderboardData.length){
-    leaderboardContainer.textContent = "ローカル・ハイスコア：まだスコアがありません。";
+    leaderboardContainer.textContent = "ローカル・ハイスコア：まだありません";
     return;
   }
   let html = "<div>ローカル・ハイスコア</div>";
@@ -869,7 +863,6 @@ function showGameOver(){
   gameOver = true;
   cancelAnimationFrame(rAF);
 
-  // save score and update leaderboard
   saveScoreToLocal(score);
 
   context.fillStyle = "rgba(0,0,0,0.7)";
@@ -882,10 +875,22 @@ function showGameOver(){
 }
 
 // =====================
-//  INIT
+//  INIT + TAP-TO-START
 // =====================
 loadScores();
 renderLeaderboard();
 updateHud();
-rAF = requestAnimationFrame(loop);
+
+let gameStarted = false;
+
+function startGame(){
+  if(gameStarted) return;
+  gameStarted = true;
+  ensureBgm();
+  rAF = requestAnimationFrame(loop);
+}
+
+const shellEl = document.querySelector(".shell");
+shellEl.addEventListener("touchstart", startGame);
+shellEl.addEventListener("mousedown", startGame);
 </script>
