@@ -1,11 +1,3 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<title>Booha Tetris</title>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
-
 <style>
 :root{
   --pink:#ff7eb9;
@@ -88,25 +80,35 @@ h1 span{
   margin-top:4px;
 }
 
-/* TOP BUTTONS */
-#helpBtn,#pauseBtn{
+/* TOP BUTTONS (help, pause, trophy) */
+#helpBtn,#pauseBtn,#trophyBtn{
   position:absolute;
   top:8px;
   width:36px;
   height:36px;
   border-radius:50%;
   border:1px solid var(--gold);
-  background:linear-gradient(135deg,var(--pink),var(--aqua));
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:20px;
+  font-size:18px;
   cursor:pointer;
   box-shadow:0 0 12px rgba(255,255,255,0.7);
   z-index:15;
 }
-#helpBtn{ left: 8px; }
-#pauseBtn{ right: 8px; }
+#helpBtn{
+  left:8px;
+  background:linear-gradient(135deg,var(--pink),var(--aqua));
+  font-size:20px;
+}
+#pauseBtn{
+  right:8px;
+  background:linear-gradient(135deg,var(--pink),var(--aqua));
+}
+#trophyBtn{
+  right:52px;
+  background:radial-gradient(circle at 30% 20%, #fef9c3,#fed7aa 40%,#fb923c 80%);
+}
 
 /* HUD */
 .hud-row{
@@ -125,25 +127,6 @@ h1 span{
   text-shadow:0 0 6px #ff7eb9;
 }
 
-/* ROTATE BUTTON (fixed, always visible, below game) */
-#rotateBtn{
-  align-self:flex-end;
-  margin-top:6px;      /* space under canvas/leaderboard */
-  width:52px;
-  height:52px;
-  border-radius:50%;
-  border:1px solid var(--gold);
-  background:radial-gradient(circle at 30% 20%, #ffffff, #ffe4e6 40%, #f472b6 80%);
-  box-shadow:0 0 18px rgba(244,114,182,0.9);
-  display:flex;        /* <— important: never disappears */
-  align-items:center;
-  justify-content:center;
-  font-size:24px;
-  color:#111827;
-  cursor:pointer;
-  z-index:14;
-}
-
 /* CANVAS */
 #game{
   margin-top:4px;
@@ -153,6 +136,40 @@ h1 span{
   box-shadow:0 0 22px rgba(59,130,246,0.55);
   image-rendering:pixelated;
   touch-action:none;
+}
+
+/* MOBILE / TABLET CONTROL PAD */
+#mobileControls,
+#mobileDownRow{
+  width:100%;
+  display:none; /* shown only on mobile/tablet */
+  justify-content:center;
+  gap:10px;
+  margin-top:6px;
+}
+
+.ctrl-btn{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  border:1px solid var(--gold);
+  background:radial-gradient(circle at 30% 20%, #ffffff, #e0f2fe 40%, #38bdf8 80%);
+  box-shadow:0 0 14px rgba(56,189,248,0.85);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  color:#0f172a;
+  cursor:pointer;
+}
+.ctrl-btn.wide{
+  width:90px;
+}
+
+/* Make rotate button look special but still a ctrl-btn */
+#rotateBtn{
+  background:radial-gradient(circle at 30% 20%, #ffffff, #ffe4e6 40%, #f472b6 80%);
+  box-shadow:0 0 18px rgba(244,114,182,0.9);
 }
 
 /* FLOATING SPARKLES */
@@ -194,7 +211,7 @@ h1 span{
   text-shadow:0 0 6px #fff;
 }
 
-/* HELP */
+/* HELP OVERLAY */
 #helpOverlay{
   position:absolute;
   inset:0;
@@ -244,13 +261,50 @@ h1 span{
   line-height:1.5;
 }
 
-/* LEADERBOARD */
-#leaderboardBox{
-  width:100%;
-  margin-top:6px;
-  font-size:0.75rem;
-  text-align:center;
+/* LEADERBOARD OVERLAY (trophy popup) */
+#leaderboardOverlay{
+  position:absolute;
+  inset:0;
+  border-radius:24px;
+  background:rgba(0,0,15,0.88);
+  backdrop-filter:blur(6px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:40;
+}
+.lb-card{
+  width:88%;
+  max-width:360px;
+  padding:18px 20px 16px;
+  border-radius:18px;
+  background:radial-gradient(circle,#111827,#020617 60%);
+  border:1px solid rgba(255,255,255,0.3);
   color:#e5e7eb;
+  font-size:0.8rem;
+  position:relative;
+}
+.lb-title{
+  font-family:'Cinzel';
+  text-align:center;
+  font-size:1.05rem;
+  margin-bottom:8px;
+}
+#lbClose{
+  position:absolute;
+  top:8px;
+  right:8px;
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--pink),var(--aqua));
+  border:1px solid var(--gold);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  cursor:pointer;
+  box-shadow:0 0 8px rgba(255,255,255,0.7);
 }
 
 /* QUESTION OVERLAY */
@@ -324,7 +378,13 @@ h1 span{
   margin-bottom:6px;
 }
 
-/* MOBILE FIXES */
+/* MOBILE & TABLET */
+@media(max-width:1024px){
+  #mobileControls,
+  #mobileDownRow{
+    display:flex;
+  }
+}
 @media(max-width:600px){
   body{
     align-items:flex-start;
@@ -341,7 +401,6 @@ h1 span{
   }
 }
 </style>
-</head>
 <body>
 
 <!-- Tap-to-start fullscreen overlay -->
@@ -363,6 +422,7 @@ h1 span{
   <!-- Top buttons -->
   <div id="helpBtn">？</div>
   <div id="pauseBtn">⏸</div>
+  <div id="trophyBtn">🏆</div>
 
   <!-- HUD rows -->
   <div class="hud-row">
@@ -399,29 +459,41 @@ h1 span{
 
       <div class="help-section">
         <strong>English</strong><br>
-        ・Drag the falling blocks with your finger = move left / right / down<br>
-        ・Tap the glowing ↻ button (bottom-right) = rotate the piece<br>
+        ・Use the buttons under the game to move ←, rotate ↻, move →, and drop ↓<br>
         ・Clear lines to get points<br>
         ・Every 10 lines opens a Booha Question
       </div>
 
       <div class="help-section">
         <strong>日本語</strong><br>
-        ・落ちているブロックを指でドラッグ → 左右・下に動かす<br>
-        ・右下の光る「↻」ボタン → ブロックを回転<br>
+        ・ゲームの下のボタンで操作します：←（左）、↻（回転）、→（右）、↓（下）<br>
         ・ラインを消すとポイントが入ります<br>
         ・１０ラインごとに「ブーハクイズ」が開きます
       </div>
     </div>
   </div>
 
-  <!-- Local leaderboard (inside shell) -->
-  <div id="leaderboardBox">
-    ローカル・ハイスコア：まだありません
+  <!-- Leaderboard overlay (trophy popup) -->
+  <div id="leaderboardOverlay">
+    <div class="lb-card">
+      <div id="lbClose">✕</div>
+      <div class="lb-title">ローカル・ハイスコア</div>
+      <div id="leaderboardBox">
+        ローカル・ハイスコア：まだありません
+      </div>
+    </div>
   </div>
 
-  <!-- Rotate button (mobile/tablet/desktop) -->
-  <div id="rotateBtn">↻</div>
+  <!-- Mobile / tablet control pad -->
+  <div id="mobileControls">
+    <div id="moveLeftBtn" class="ctrl-btn">←</div>
+    <div id="rotateBtn" class="ctrl-btn">↻</div>
+    <div id="moveRightBtn" class="ctrl-btn">→</div>
+  </div>
+  <div id="mobileDownRow">
+    <div id="moveDownBtn" class="ctrl-btn wide">↓</div>
+  </div>
+
 </div>
 
 <!-- Question overlay (global) -->
@@ -471,7 +543,7 @@ let linesClearedTotal = 0;
 let currentQuestionIndex = 0;
 let score = 0;
 
-// Leaderboard
+// Leaderboard storage
 const leaderboardContainer = document.getElementById("leaderboardBox");
 let leaderboardData = [];
 const LEADERBOARD_KEY = "boohaTetrisScores";
@@ -484,6 +556,7 @@ function loadScores(){
     leaderboardData = [];
   }
 }
+
 function saveScoreToLocal(newScore){
   if(!newScore || isNaN(newScore)) return;
   leaderboardData.push({score:newScore, date:Date.now()});
@@ -494,17 +567,17 @@ function saveScoreToLocal(newScore){
   }catch(e){}
   renderLeaderboard();
 }
+
 function renderLeaderboard(){
   if(!leaderboardContainer) return;
   if(!leaderboardData.length){
     leaderboardContainer.textContent = "ローカル・ハイスコア：まだありません";
     return;
   }
-  let html = "<div>ローカル・ハイスコア</div><div style='margin-top:4px;'>";
+  let html = "<div style='margin-bottom:4px;'>最新５ゲーム</div>";
   leaderboardData.forEach((entry,idx)=>{
     html += `<div>${idx+1}位：${entry.score} 点</div>`;
   });
-  html += "</div>";
   leaderboardContainer.innerHTML = html;
 }
 
@@ -642,11 +715,13 @@ function updateParticles(){
 // HUD & QUESTIONS & SCORE
 // =====================
 function updateHud(){
-  linesClearedTotal = Math.max(0, linesClearedTotal);
+  if(linesClearedTotal < 0) linesClearedTotal = 0;
+  linesClearedTotal = Math.floor(linesClearedTotal);
   linesCountEl.textContent = linesClearedTotal;
   nextAtEl.textContent = (currentQuestionIndex+1)*10;
   scoreEl.textContent = score;
 }
+
 const questionOverlay = document.getElementById("questionOverlay");
 const questionTextEl = document.getElementById("questionText");
 const continueBtn = document.getElementById("continueBtn");
@@ -761,136 +836,32 @@ function loop(){
 }
 
 // =====================
-// TOUCH CONTROLS (DRAG-ON-PIECE)
-//  Finger ON the piece = drag left/right/down
-//  Rotation only from the ↻ button
+// MOVEMENT FUNCTIONS
 // =====================
-let draggingPiece = false;
-let lastTouchX = 0;
-let lastTouchY = 0;
-let accumX = 0;
-let accumY = 0;
-
-function getPieceBounds(){
-  let left = Infinity, right = -Infinity, top = Infinity, bottom = -Infinity;
-  for(let r=0; r<tetromino.matrix.length; r++){
-    for(let c=0; c<tetromino.matrix[r].length; c++){
-      if(tetromino.matrix[r][c]){
-        const drawRow = tetromino.row + r;
-        if(drawRow < 0) continue;
-        const x = (tetromino.col + c) * grid;
-        const y = drawRow * grid;
-        left   = Math.min(left,   x);
-        right  = Math.max(right,  x + grid);
-        top    = Math.min(top,    y);
-        bottom = Math.max(bottom, y + grid);
-      }
-    }
-  }
-  if(left === Infinity){
-    return {left:0,right:0,top:0,bottom:0};
-  }
-  return {left,right,top,bottom};
-}
-
-canvas.addEventListener("touchstart", e=>{
-  ensureBgm();
+function moveLeft(){
   if(gameOver || isPaused || isPausedForQuestion) return;
-
-  const rect = canvas.getBoundingClientRect();
-  const t = e.touches[0];
-  const scaleX = canvas.width / rect.width;
-  const scaleY = canvas.height / rect.height;
-  const cx = (t.clientX - rect.left) * scaleX;
-  const cy = (t.clientY - rect.top) * scaleY;
-
-  // Start dragging from anywhere on the canvas
-  draggingPiece = true;
-  lastTouchX = cx;
-  lastTouchY = cy;
-  accumX = 0;
-  accumY = 0;
-
-  e.preventDefault();
-},{passive:false});
-
-canvas.addEventListener("touchmove", e=>{
-  if(!draggingPiece || gameOver || isPaused || isPausedForQuestion) return;
-
-  const rect = canvas.getBoundingClientRect();
-  const t = e.touches[0];
-  const scaleX = canvas.width / rect.width;
-  const scaleY = canvas.height / rect.height;
-  const cx = (t.clientX - rect.left) * scaleX;
-  const cy = (t.clientY - rect.top) * scaleY;
-
-  const dx = cx - lastTouchX;
-  const dy = cy - lastTouchY;
-
-  lastTouchX = cx;
-  lastTouchY = cy;
-
-  accumX += dx;
-  accumY += dy;
-
-  const stepX = 14;
-  const stepY = 16;
-
-  // Horizontal: move 1 column per stepX
-  while(accumX > stepX){
-    const newCol = tetromino.col + 1;
-    if(isValidMove(tetromino.matrix, tetromino.row, newCol)){
-      tetromino.col = newCol;
-    }
-    accumX -= stepX;
+  const nc = tetromino.col - 1;
+  if(isValidMove(tetromino.matrix,tetromino.row,nc)) tetromino.col = nc;
+}
+function moveRight(){
+  if(gameOver || isPaused || isPausedForQuestion) return;
+  const nc = tetromino.col + 1;
+  if(isValidMove(tetromino.matrix,tetromino.row,nc)) tetromino.col = nc;
+}
+function rotatePiece(){
+  if(gameOver || isPaused || isPausedForQuestion) return;
+  const rot = rotate(tetromino.matrix);
+  if(isValidMove(rot,tetromino.row,tetromino.col)) tetromino.matrix = rot;
+}
+function softDrop(){
+  if(gameOver || isPaused || isPausedForQuestion) return;
+  const nr = tetromino.row + 1;
+  if(isValidMove(tetromino.matrix,nr,tetromino.col)){
+    tetromino.row = nr;
+  }else{
+    // land and place
+    placeTetromino();
   }
-  while(accumX < -stepX){
-    const newCol = tetromino.col - 1;
-    if(isValidMove(tetromino.matrix, tetromino.row, newCol)){
-      tetromino.col = newCol;
-    }
-    accumX += stepX;
-  }
-
-  // Vertical: drag down faster
-  while(accumY > stepY){
-    const newRow = tetromino.row + 1;
-    if(isValidMove(tetromino.matrix, newRow, tetromino.col)){
-      tetromino.row = newRow;
-    }else{
-      // Hit something: place the piece and stop dragging
-      placeTetromino();
-      draggingPiece = false;
-      break;
-    }
-    accumY -= stepY;
-  }
-
-  e.preventDefault();
-},{passive:false});
-
-canvas.addEventListener("touchend", ()=>{
-  draggingPiece = false;
-});
-
-// =====================
-// ROTATE BUTTON
-// =====================
-const rotateBtn = document.getElementById("rotateBtn");
-if(rotateBtn){
-  const doRotate = () => {
-    ensureBgm();
-    if(gameOver || isPaused || isPausedForQuestion) return;
-    const rotated = rotate(tetromino.matrix);
-    if(isValidMove(rotated, tetromino.row, tetromino.col)){
-      tetromino.matrix = rotated;
-    }
-  };
-  rotateBtn.addEventListener("click", doRotate);
-  rotateBtn.addEventListener("touchstart", function(e){
-    e.preventDefault();
-    doRotate();
-  }, {passive:false});
 }
 
 // =====================
@@ -901,24 +872,44 @@ document.addEventListener("keydown", e=>{
   if(gameOver || isPaused || isPausedForQuestion) return;
 
   if(e.key==="ArrowLeft"){
-    const nc = tetromino.col - 1;
-    if(isValidMove(tetromino.matrix,tetromino.row,nc)) tetromino.col = nc;
+    moveLeft();
   }
   if(e.key==="ArrowRight"){
-    const nc = tetromino.col + 1;
-    if(isValidMove(tetromino.matrix,tetromino.row,nc)) tetromino.col = nc;
+    moveRight();
   }
   if(e.key==="ArrowUp"){
-    const rot = rotate(tetromino.matrix);
-    if(isValidMove(rot,tetromino.row,tetromino.col)) tetromino.matrix = rot;
+    rotatePiece();
   }
   if(e.key==="ArrowDown"){
-    const nr = tetromino.row + 1;
-    if(isValidMove(tetromino.matrix,nr,tetromino.col)){
-      tetromino.row = nr;
-    }
+    softDrop();
   }
 });
+
+// =====================
+// MOBILE / TABLET CONTROL BUTTONS
+// =====================
+const moveLeftBtn = document.getElementById("moveLeftBtn");
+const moveRightBtn = document.getElementById("moveRightBtn");
+const rotateBtn   = document.getElementById("rotateBtn");
+const moveDownBtn = document.getElementById("moveDownBtn");
+
+function attachControl(btn, handler){
+  if(!btn) return;
+  btn.addEventListener("click", ()=>{
+    ensureBgm();
+    handler();
+  });
+  btn.addEventListener("touchstart", (e)=>{
+    e.preventDefault();
+    ensureBgm();
+    handler();
+  }, {passive:false});
+}
+
+attachControl(moveLeftBtn, moveLeft);
+attachControl(moveRightBtn, moveRight);
+attachControl(rotateBtn,   rotatePiece);
+attachControl(moveDownBtn, softDrop);
 
 // =====================
 // PAUSE
@@ -927,6 +918,7 @@ const pauseBtn = document.getElementById("pauseBtn");
 const pauseOverlay = document.getElementById("pauseOverlay");
 
 function pauseGame(){
+  if(gameOver) return;
   isPaused = true;
   pauseOverlay.style.display = "flex";
   if(bgmStarted) bgm.volume = 0.25;
@@ -959,6 +951,25 @@ helpClose.onclick = ()=>{
   helpOverlay.style.display = "none";
   resumeGame();
 };
+
+// =====================
+// TROPHY / LEADERBOARD OVERLAY
+// =====================
+const trophyBtn = document.getElementById("trophyBtn");
+const leaderboardOverlay = document.getElementById("leaderboardOverlay");
+const lbClose = document.getElementById("lbClose");
+
+if(trophyBtn && leaderboardOverlay && lbClose){
+  trophyBtn.onclick = ()=>{
+    ensureBgm();
+    pauseGame();
+    leaderboardOverlay.style.display = "flex";
+  };
+  lbClose.onclick = ()=>{
+    leaderboardOverlay.style.display = "none";
+    resumeGame();
+  };
+}
 
 // =====================
 // GAME OVER
