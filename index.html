@@ -179,6 +179,12 @@ h1 span{
   cursor:pointer;
 }
 
+/* Special glowing style for rotate button */
+#rotateBtn{
+  background:radial-gradient(circle at 30% 20%, #fdf2ff, #e879f9 40%, #a855f7 80%);
+  box-shadow:0 0 18px rgba(232,121,249,0.9);
+}
+
 /* SHOW BUTTONS ON ALL MOBILE + TABLETS */
 @media(max-width:1366px){
   #mobileControls,
@@ -247,7 +253,7 @@ h1 span{
   box-shadow:0 0 8px rgba(255,255,255,0.7);
 }
 
-/* LEADERBOARD */
+/* LEADERBOARD (inline) */
 #leaderboardBox{
   width:100%;
   margin-top:6px;
@@ -310,27 +316,29 @@ h1 span{
 @media(max-width:600px){
   body{
     align-items:flex-start;
+    justify-content:center;
   }
   .shell{
-    transform:scale(0.9);
-    transform-origin: top center;
+    transform:none;                 /* full size, no shrink */
+    transform-origin:top center;
+    width:100%;
+    max-width:420px;                /* big phone shell */
     max-height:none;
-    margin-top:8px;
-    margin-bottom:16px;
+    margin:8px auto 16px;
   }
   #game{
-    height:520px;
+    height:560px;
   }
 }
 
-/* TABLETS */
+/* TABLETS (portrait + landscape) */
 @media(min-width:601px) and (max-width:1366px){
   body{
     align-items:center;
     justify-content:center;
   }
   .shell{
-    transform:scale(1);
+    transform:none;                 /* full size on tablet */
     transform-origin:center center;
     max-height:94vh;
     margin:8px 0;
@@ -511,7 +519,7 @@ function renderLeaderboard(){
   leaderboardContainer.innerHTML = html;
 }
 
-// Questions
+// Questions (placeholders)
 const questions = Array.from({length:60}, (_,i)=>
   `Question ${i+1} placeholder — January vocab EN/JP here.`
 );
@@ -674,8 +682,9 @@ continueBtn.onclick = ()=>{
   updateHud();
 };
 
-// scoring per lines
-const lineScoreTable = [0,100,300,500,800];
+// scoring per lines: 0,1,2,3,4 lines
+// 1 line = 10, 2 lines = 20, 3 lines = 50, 4 lines = 100
+const lineScoreTable = [0, 10, 20, 50, 100];
 
 // =====================
 // PLACE TETROMINO
@@ -714,7 +723,7 @@ function placeTetromino(){
 
   if(cleared>0){
     linesClearedTotal += cleared;
-    score += lineScoreTable[cleared] || cleared*100;
+    score += lineScoreTable[cleared] || cleared*10;
     updateHud();
     maybeTriggerQuestion();
   }
@@ -923,5 +932,3 @@ startOverlay.addEventListener("touchstart", function(e){
   startGame();
 },{passive:false});
 </script>
-</body>
-</html>
