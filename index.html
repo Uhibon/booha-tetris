@@ -124,6 +124,33 @@ h1 span{
   color:var(--pink);
   text-shadow:0 0 6px #ff7eb9;
 }
+/* Mobile rotate button */
+#rotateBtn{
+  position:absolute;
+  right:10px;
+  bottom:10px;
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  border:1px solid var(--gold);
+  background:radial-gradient(circle at 30% 20%, #ffffff, #ffe4e6 40%, #f472b6 80%);
+  box-shadow:0 0 18px rgba(244,114,182,0.9);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  color:#111827;
+  cursor:pointer;
+  z-index:14;
+}
+
+/* Hide on desktop, show on mobile */
+@media (min-width:601px){
+  #rotateBtn{ display:none; }
+}
+@media (max-width:600px){
+  #rotateBtn{ display:flex; }
+}
 
 /* CANVAS */
 #game{
@@ -395,11 +422,13 @@ h1 span{
     </div>
   </div>
 
-  <!-- Local leaderboard (inside shell) -->
+    <!-- Local leaderboard (inside shell) -->
   <div id="leaderboardBox">
     ローカル・ハイスコア：まだありません
   </div>
 
+  <!-- Mobile rotate button -->
+  <div id="rotateBtn">↻</div>
 </div>
 
 <!-- Question overlay (global) -->
@@ -738,16 +767,15 @@ function loop(){
 }
 
 // =====================
-// TOUCH CONTROLS (NEW SIMPLE VERSION)
-//  ・Touch / tap ANYWHERE UNDER the blocks
-//      → rotate once immediately
-//      → then drag left/right/down to move
+// TOUCH CONTROLS (MOBILE DRAG ONLY)
+//  ・Finger ON the piece = drag left/right/down
+//  ・Rotation only from the glowing circle button
 // =====================
-let pointerMode = null; // 'drag' or null
-let lastDragX = 0;
-let lastDragY = 0;
-let dragAccumX = 0;
-let dragAccumY = 0;
+let draggingPiece = false;
+let lastTouchX = 0;
+let lastTouchY = 0;
+let accumX = 0;
+let accumY = 0;
 
 function getPieceBounds(){
   let left = Infinity, right = -Infinity, top = Infinity, bottom = -Infinity;
@@ -782,44 +810,95 @@ canvas.addEventListener("touchstart", e=>{
 
   const bounds = getPieceBounds();
 
-  // Only respond to touches clearly UNDER the piece
-  if(cy <= bounds.bottom + grid * 0.2){
-    pointerMode = null;
-    return;
+  // Only start dragging if finger is actually on the piece
+  if(cx >= bounds.left && cx <= bounds.right &&
+     cy >= bounds.top  && cy <= bounds.bottom){
+    draggingPiece = true;
+    lastTouchX = cx;
+    lastTouchY = cy;
+    accumX = 0;
+    accumY = 0;
+    e.preventDefault();
+  }else{
+    draggingPiece = false;
   }
-
-  // 1) First touch under the piece → rotate once
-  const rotated = rotate(tetromino.matrix);
-  if(isValidMove(rotated, tetromino.row, tetromino.col)){
-    tetromino.matrix = rotated;
-  }
-
-  // 2) Enter drag mode
-  pointerMode = "drag";
-  lastDragX = cx;
-  lastDragY = cy;
-  dragAccumX = 0;
-  dragAccumY = 0;
-
-  e.preventDefault();
 },{passive:false});
 
 canvas.addEventListener("touchmove", e=>{
-  if(pointerMode !== "drag" || gameOver || isPaused || isPausedForQuestion) return;
+  if(!draggingPiece || gameOver || isPaused || isPausedForQuestion) return;
 
   const rect = canvas.getBoundingClientRect();
   const t = e.touches[0];
   const cx = t.clientX - rect.left;
   const cy = t.clientY - rect.top;
 
-  let dx = cx - lastDragX;
-  let dy = cy - lastDragY;
+  const dx = cx - lastTouchX;
+  const dy = cy - lastTouchY;
 
-  lastDragX = cx;
-  lastDragY = cy;
+  lastTouchX = cx;
+  lastTouchY = cy;
 
-  dragAccumX += dx;
-  dragAccumY += dy;
+  accumX += dx;
+  accumY += dy;
+
+  const stepX = 14; // smaller = more responsive
+  const stepY = 16;
+
+  // Horizontal: move 1 column per stepX
+  while(accumX > stepX){
+    const newCol = tetromino.col + 1;
+    if(isValidMove(tetromino.matrix, tetromino.row, newCol)){
+      tetromino.col = newCol;
+    }
+    accumX -= stepX;
+  }
+  while(accumX < -stepX){
+    const newCol = tetromino.col - 1;
+    if(isValidMove(tetromino.matrix, tetromino.row, newCol)){
+      tetromino.col = newCol;
+    }
+    accumX += stepX;
+  }
+
+  // Vertical: drag down faster
+  while(accumY > stepY){
+    const newRow = tetromino.row + 1;
+    if(isValidMove(tetromino.matrix, newRow, tetromino.col)){
+      tetromino.row = newRow;
+    }else{
+      // Hit something: place the piece and stop dragging
+      placeTetromino();
+      draggingPiece = false;
+      break;
+    }
+    accumY -= stepY;
+  }
+
+  e.preventDefault();
+},{passive:false});
+
+canvas.addEventListener("touchend", ()=>{
+  draggingPiece = false;
+});
+
+  
+// Rotate button (mobile)
+const rotateBtn = document.getElementById("rotateBtn");
+if(rotateBtn){
+  const doRotate = () => {
+    ensureBgm();
+    if(gameOver || isPaused || isPausedForQuestion) return;
+    const rotated = rotate(tetromino.matrix);
+    if(isValidMove(rotated, tetromino.row, tetromino.col)){
+      tetromino.matrix = rotated;
+    }
+  };
+  rotateBtn.addEventListener("click", doRotate);
+  rotateBtn.addEventListener("touchstart", function(e){
+    e.preventDefault();
+    doRotate();
+  }, {passive:false});
+}
 
   // Horizontal movement: every ~12px → move 1 column
   const stepX = 12;
