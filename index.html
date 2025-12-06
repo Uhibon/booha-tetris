@@ -337,6 +337,103 @@ h1 span{
   }
 }
 </style>
+<body>
+
+<!-- Tap-to-start fullscreen overlay -->
+<div id="startOverlay">
+  <div id="startOverlayInner">
+    <span class="big">画面をタップしてスタート</span>
+    ブロックを動かしてラインを消そう！<br>
+    １０ラインごとにブーハクイズが出てくるよ。
+  </div>
+</div>
+
+<div class="shell">
+
+  <h1>
+    BOOHA TETRIS
+    <span>１月のれんしゅう</span>
+  </h1>
+
+  <!-- Top buttons -->
+  <div id="helpBtn">？</div>
+  <div id="pauseBtn">⏸</div>
+
+  <!-- HUD rows -->
+  <div class="hud-row">
+    <div><span class="label">ライン数：</span><span id="linesCount" class="value">0</span></div>
+    <div><span class="label">次のクイズ：</span><span id="nextAt" class="next">10</span><span class="label"> ライン目</span></div>
+  </div>
+  <div class="hud-row">
+    <div><span class="label">スコア：</span><span id="scoreValue" class="value">0</span></div>
+    <div></div>
+  </div>
+
+  <!-- Game canvas -->
+  <canvas id="game" width="320" height="640"></canvas>
+
+  <!-- Sparkles -->
+  <div class="sparkle-overlay">
+    <div class="spark" style="left:12%;"></div>
+    <div class="spark" style="left:32%;"></div>
+    <div class="spark" style="left:52%;"></div>
+    <div class="spark" style="left:72%;"></div>
+    <div class="spark" style="left:88%;"></div>
+  </div>
+
+  <!-- Pause overlay -->
+  <div id="pauseOverlay">
+    <div>タップしてゲームに戻る</div>
+  </div>
+
+  <!-- Help overlay -->
+  <div id="helpOverlay">
+    <div class="help-card">
+      <div id="helpClose">✕</div>
+      <div class="help-title">How to Play ／ 遊び方</div>
+
+      <div class="help-section">
+        <strong>English</strong><br>
+        ・Use the buttons under the game to move ←, rotate ↻, move →, and drop ↓<br>
+        ・Clear lines to get points<br>
+        ・Every 10 lines opens a Booha Question
+      </div>
+
+      <div class="help-section">
+        <strong>日本語</strong><br>
+        ・ゲームの下のボタンで操作します：←（左）、↻（回転）、→（右）、↓（下）<br>
+        ・ラインを消すとポイントが入ります<br>
+        ・１０ラインごとに「ブーハクイズ」が開きます
+      </div>
+    </div>
+  </div>
+
+  <!-- Simple inline leaderboard -->
+  <div id="leaderboardBox">
+    ローカル・ハイスコア：まだありません
+  </div>
+
+  <!-- Mobile / tablet control pad (shown by CSS @media) -->
+  <div id="mobileControls">
+    <div id="moveLeftBtn" class="mob-btn">←</div>
+    <div id="rotateBtn"   class="mob-btn">↻</div>
+    <div id="moveRightBtn" class="mob-btn">→</div>
+  </div>
+  <div id="mobileDownRow">
+    <div id="moveDownBtn" class="mob-btn">↓</div>
+  </div>
+
+</div>
+
+<!-- Question overlay (global) -->
+<div id="questionOverlay">
+  <div class="q-card">
+    <div class="q-title">Checkpoint</div>
+    <div id="questionText"></div>
+    <button id="continueBtn">Continue</button>
+  </div>
+</div>
+<script>
 // =====================
 // AUDIO
 // =====================
@@ -405,10 +502,12 @@ function renderLeaderboard(){
     leaderboardContainer.textContent = "ローカル・ハイスコア：まだありません";
     return;
   }
-  let html = "<div style='margin-bottom:4px;'>最新５ゲーム</div>";
+  let html = "<div>ローカル・ハイスコア（最新５ゲーム）</div>";
+  html += "<div style='margin-top:4px;'>";
   leaderboardData.forEach((entry,idx)=>{
     html += `<div>${idx+1}位：${entry.score} 点</div>`;
   });
+  html += "</div>";
   leaderboardContainer.innerHTML = html;
 }
 
@@ -690,7 +789,6 @@ function softDrop(){
   if(isValidMove(tetromino.matrix,nr,tetromino.col)){
     tetromino.row = nr;
   }else{
-    // land and place
     placeTetromino();
   }
 }
@@ -719,10 +817,10 @@ document.addEventListener("keydown", e=>{
 // =====================
 // MOBILE / TABLET CONTROL BUTTONS
 // =====================
-const moveLeftBtn = document.getElementById("moveLeftBtn");
+const moveLeftBtn  = document.getElementById("moveLeftBtn");
 const moveRightBtn = document.getElementById("moveRightBtn");
-const rotateBtn   = document.getElementById("rotateBtn");
-const moveDownBtn = document.getElementById("moveDownBtn");
+const rotateBtn    = document.getElementById("rotateBtn");
+const moveDownBtn  = document.getElementById("moveDownBtn");
 
 function attachControl(btn, handler){
   if(!btn) return;
@@ -737,10 +835,10 @@ function attachControl(btn, handler){
   }, {passive:false});
 }
 
-attachControl(moveLeftBtn, moveLeft);
+attachControl(moveLeftBtn,  moveLeft);
 attachControl(moveRightBtn, moveRight);
-attachControl(rotateBtn,   rotatePiece);
-attachControl(moveDownBtn, softDrop);
+attachControl(rotateBtn,    rotatePiece);
+attachControl(moveDownBtn,  softDrop);
 
 // =====================
 // PAUSE
@@ -782,25 +880,6 @@ helpClose.onclick = ()=>{
   helpOverlay.style.display = "none";
   resumeGame();
 };
-
-// =====================
-// TROPHY / LEADERBOARD OVERLAY
-// =====================
-const trophyBtn = document.getElementById("trophyBtn");
-const leaderboardOverlay = document.getElementById("leaderboardOverlay");
-const lbClose = document.getElementById("lbClose");
-
-if(trophyBtn && leaderboardOverlay && lbClose){
-  trophyBtn.onclick = ()=>{
-    ensureBgm();
-    pauseGame();
-    leaderboardOverlay.style.display = "flex";
-  };
-  lbClose.onclick = ()=>{
-    leaderboardOverlay.style.display = "none";
-    resumeGame();
-  };
-}
 
 // =====================
 // GAME OVER
