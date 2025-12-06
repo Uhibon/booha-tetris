@@ -105,8 +105,8 @@ h1 span{
   box-shadow:0 0 12px rgba(255,255,255,0.7);
   z-index:15;
 }
-#helpBtn{left:8px;}
-#pauseBtn{right:8px;}
+#helpBtn{ left: 8px; }
+#pauseBtn{ right: 8px; }
 
 /* HUD */
 .hud-row{
@@ -125,18 +125,17 @@ h1 span{
   text-shadow:0 0 6px #ff7eb9;
 }
 
-/* Mobile/Tablet rotate button (also visible on desktop – that’s fine) */
-/* Rotate button – same look, but moved below the game area */
+/* ROTATE BUTTON (fixed, always visible, below game) */
 #rotateBtn{
-  align-self:flex-end;         /* bottom-right inside the shell layout */
-  margin-top:6px;              /* small gap under the canvas/leaderboard */
+  align-self:flex-end;
+  margin-top:6px;      /* space under canvas/leaderboard */
   width:52px;
   height:52px;
   border-radius:50%;
   border:1px solid var(--gold);
   background:radial-gradient(circle at 30% 20%, #ffffff, #ffe4e6 40%, #f472b6 80%);
   box-shadow:0 0 18px rgba(244,114,182,0.9);
-  display:flex;
+  display:flex;        /* <— important: never disappears */
   align-items:center;
   justify-content:center;
   font-size:24px;
@@ -153,7 +152,7 @@ h1 span{
   border:1px solid var(--outline);
   box-shadow:0 0 22px rgba(59,130,246,0.55);
   image-rendering:pixelated;
-  touch-action:none; /* prevent double-tap zoom / gestures on canvas */
+  touch-action:none;
 }
 
 /* FLOATING SPARKLES */
@@ -181,7 +180,7 @@ h1 span{
   100%{transform:translateY(-40%) scale(1.05);opacity:0;}
 }
 
-/* PAUSE OVERLAY (inside shell) */
+/* PAUSE OVERLAY */
 #pauseOverlay{
   position:absolute;
   inset:0;
@@ -195,7 +194,7 @@ h1 span{
   text-shadow:0 0 6px #fff;
 }
 
-/* HELP OVERLAY (inside shell) */
+/* HELP */
 #helpOverlay{
   position:absolute;
   inset:0;
@@ -245,7 +244,7 @@ h1 span{
   line-height:1.5;
 }
 
-/* LEADERBOARD (inside shell) */
+/* LEADERBOARD */
 #leaderboardBox{
   width:100%;
   margin-top:6px;
@@ -254,7 +253,7 @@ h1 span{
   color:#e5e7eb;
 }
 
-/* QUESTION OVERLAY (full screen) */
+/* QUESTION OVERLAY */
 #questionOverlay{
   position:fixed;
   inset:0;
@@ -300,7 +299,7 @@ h1 span{
   background:linear-gradient(135deg,#f97316,#fb7185,#e879f9);
 }
 
-/* START OVERLAY (full screen) */
+/* START OVERLAY */
 #startOverlay{
   position:fixed;
   inset:0;
@@ -325,15 +324,20 @@ h1 span{
   margin-bottom:6px;
 }
 
-/* MOBILE SCALE */
+/* MOBILE FIXES */
 @media(max-width:600px){
+  body{
+    align-items:flex-start;
+  }
   .shell{
-    transform:scale(0.83);
+    transform:scale(0.86);
     transform-origin: top center;
-    max-height: 88vh;
+    max-height:none;
+    margin-top:8px;
+    margin-bottom:16px;
   }
   #game{
-    height: 560px; /* shrink canvas to fit mobile screens */
+    height:540px;
   }
 }
 </style>
