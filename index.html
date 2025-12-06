@@ -22,20 +22,22 @@ body{
   color:#f9fafb;
 }
 
-/* PHONE SHELL */
+/* PHONE SHELL – responsive size */
 .shell{
   position:relative;
   padding:18px 22px 24px;
   border-radius:24px;
   background:radial-gradient(circle at top,rgba(148,163,255,0.25),rgba(15,23,42,0.98));
   border:1px solid rgba(148,163,255,0.5);
-  box-shadow:
-    0 0 40px rgba(56,189,248,0.45),
-    0 0 80px rgba(248,250,252,0.08);
   display:flex;
   flex-direction:column;
   align-items:center;
   gap:10px;
+
+  /* size */
+  max-width:420px;
+  width:min(420px, 100vw - 24px);
+  max-height:96vh;
 }
 
 .shell::before{
@@ -56,14 +58,6 @@ body{
   0%{transform:translate3d(-4px,-4px,0) scale(1);}
   100%{transform:translate3d(4px,4px,0) scale(1.02);}
 }
-
-/* PULSE (already quite nice, optional extra beat if you want)
-@keyframes pulseBeat{
-  0%{transform:scale(1);}
-  50%{transform:scale(1.03);}
-  100%{transform:scale(1);}
-}
-*/
 
 /* TITLE */
 h1{
@@ -105,7 +99,6 @@ h1 span{
   z-index:15;
 }
 #helpBtn{left:8px;}
-/* Trophy between help + pause */
 #trophyBtn{right:52px;}
 #pauseBtn{right:8px;}
 
@@ -137,7 +130,7 @@ h1 span{
     0 0 22px rgba(59,130,246,0.55),
     0 0 50px rgba(15,23,42,0.9);
   image-rendering:pixelated;
-  touch-action:none;
+  touch-action:none; /* stop pinch/drag gestures on canvas */
 }
 
 /* FLOATING SPARKLES */
@@ -172,7 +165,7 @@ h1 span{
   100%{transform:translate3d(0,-40%,0) scale(1.05); opacity:0;}
 }
 
-/* MOBILE BUTTON PAD */
+/* MOBILE / TABLET BUTTON PAD */
 #mobileControls,
 #mobileDownRow{
   display:none;
@@ -203,7 +196,7 @@ h1 span{
   box-shadow:0 0 18px rgba(232,121,249,0.9);
 }
 
-/* Show control pad on mobile + tablets */
+/* show pad on mobile + small tablets */
 @media(max-width:1366px){
   #mobileControls,
   #mobileDownRow{
@@ -380,14 +373,8 @@ h1 span{
   font-size:1.1rem;
   margin-bottom:6px;
 }
-
-/* PHONES — original “perfect size” scaling */
-@media(max-width:600px){
-  .shell{
-    transform:scale(0.9);
-  }
-}
 </style>
+</head>
 <body>
 
 <!-- Tap-to-start fullscreen overlay -->
@@ -401,30 +388,42 @@ h1 span{
 
 <div class="shell">
 
+  <!-- TITLE -->
   <h1>
     BOOHA TETRIS
     <span>１月のれんしゅう</span>
   </h1>
 
-  <!-- Top buttons -->
+  <!-- TOP BUTTONS -->
   <div id="helpBtn">？</div>
   <div id="trophyBtn">🏆</div>
   <div id="pauseBtn">⏸</div>
 
-  <!-- HUD rows -->
+  <!-- HUD -->
   <div class="hud-row">
-    <div><span class="label">ライン数：</span><span id="linesCount" class="value">0</span></div>
-    <div><span class="label">次のクイズ：</span><span id="nextAt" class="next">10</span><span class="label"> ライン目</span></div>
+    <div>
+      <span class="label">ライン：</span>
+      <span class="value" id="linesCount">0</span>
+    </div>
+    <div>
+      <span class="label">次のクイズ：</span>
+      <span class="next" id="nextAt">10</span>
+      <span class="label">ライン</span>
+    </div>
   </div>
+
   <div class="hud-row">
-    <div><span class="label">スコア：</span><span id="scoreValue" class="value">0</span></div>
+    <div>
+      <span class="label">スコア：</span>
+      <span class="value" id="scoreValue">0</span>
+    </div>
     <div></div>
   </div>
 
-  <!-- Game canvas -->
+  <!-- GAME CANVAS -->
   <canvas id="game" width="320" height="640"></canvas>
 
-  <!-- Sparkles -->
+  <!-- SPARKLE OVERLAY -->
   <div class="sparkle-overlay">
     <div class="spark" style="left:10%;"></div>
     <div class="spark" style="left:30%;"></div>
@@ -434,60 +433,65 @@ h1 span{
     <div class="spark" style="left:42%;"></div>
   </div>
 
-  <!-- Pause overlay -->
+  <!-- PAUSE OVERLAY -->
   <div id="pauseOverlay">
     <div>タップしてゲームに戻る</div>
   </div>
 
-  <!-- Help overlay -->
+  <!-- HELP OVERLAY -->
   <div id="helpOverlay">
     <div class="help-card">
       <div id="helpClose">✕</div>
+
       <div class="help-title">How to Play ／ 遊び方</div>
 
       <div class="help-section">
         <strong>English</strong><br>
-        ・Use the buttons under the game: ← (left), ↻ (rotate), → (right), ↓ (soft drop)<br>
-        ・Clear lines to get points (max 100 points per drop)<br>
+        ・Tap the rotate button to rotate<br>
+        ・Use the ← → buttons to move<br>
+        ・Use the ↓ button to soft drop<br>
+        ・Clear lines to score points<br>
         ・Every 10 lines opens a Booha Question
       </div>
 
       <div class="help-section">
         <strong>日本語</strong><br>
-        ・ゲームの下のボタンで操作します：←（左）、↻（回転）、→（右）、↓（下）<br>
-        ・ラインを消すとポイントが入ります（１回で最大１００点）<br>
-        ・１０ラインごとに「ブーハクイズ」が開きます
+        ・回転ボタンをタップ → 回転<br>
+        ・← → ボタン → 左右に動かす<br>
+        ・↓ ボタン → 下に落とす<br>
+        ・ラインを消すとポイントが入る<br>
+        ・１０ラインごとに「ブーハクイズ」が出る
       </div>
     </div>
   </div>
 
-  <!-- Leaderboard popup -->
+  <!-- LEADERBOARD POPUP -->
   <div id="leaderboardOverlay">
     <div class="leader-card">
       <div id="leaderClose">✕</div>
       <div class="leader-title">ローカル・ハイスコア</div>
-      <div id="leaderboardList">
-        ローカル・ハイスコア：まだありません
-      </div>
+      <div id="leaderboardList">まだありません</div>
     </div>
   </div>
 
-  <!-- Mobile / tablet control pad -->
+  <!-- MOBILE CONTROL BUTTONS -->
   <div id="mobileControls">
-    <div id="moveLeftBtn" class="mob-btn">←</div>
-    <div id="rotateBtn"   class="mob-btn">↻</div>
-    <div id="moveRightBtn" class="mob-btn">→</div>
+    <div class="mob-btn" id="moveLeftBtn">←</div>
+    <div class="mob-btn" id="rotateBtn">↻</div>
+    <div class="mob-btn" id="moveRightBtn">→</div>
   </div>
+
   <div id="mobileDownRow">
-    <div id="moveDownBtn" class="mob-btn">↓</div>
+    <div class="mob-btn" id="moveDownBtn">↓</div>
   </div>
 
-</div>
+</div> <!-- end shell -->
 
-<!-- Question overlay (global) -->
+<!-- QUESTION OVERLAY (GLOBAL) -->
 <div id="questionOverlay">
   <div class="q-card">
     <div class="q-title">Checkpoint</div>
+    <div class="q-sub">Booha Question Gate</div>
     <div id="questionText"></div>
     <button id="continueBtn">Continue</button>
   </div>
@@ -496,7 +500,9 @@ h1 span{
 // =====================
 // AUDIO
 // =====================
-let bgmStarted = false;
+let gameStarted = false;   // NEW: controls both game + BGM start
+let bgmStarted  = false;
+
 const bgm = new Audio("booha-tetris-january.mp3");
 bgm.loop = true;
 bgm.volume = 0.55;
@@ -505,9 +511,9 @@ const sfxClear = new Audio("booha-tetris-sound.mp3");
 sfxClear.volume = 0.9;
 
 function ensureBgm(){
-  if(!bgmStarted){
-    bgm.play().then(()=>{ bgmStarted = true; }).catch(()=>{});
-  }
+  // only allow music once the game has actually started
+  if(!gameStarted || bgmStarted) return;
+  bgm.play().then(()=>{ bgmStarted = true; }).catch(()=>{});
 }
 
 // =====================
@@ -523,14 +529,14 @@ let isPaused = false;
 let isPausedForQuestion = false;
 
 const linesCountEl = document.getElementById("linesCount");
-const nextAtEl = document.getElementById("nextAt");
-const scoreEl = document.getElementById("scoreValue");
+const nextAtEl   = document.getElementById("nextAt");
+const scoreEl    = document.getElementById("scoreValue");
 
 let linesClearedTotal = 0;
 let currentQuestionIndex = 0;
 let score = 0;
 
-// Leaderboard storage
+// Leaderboard
 const leaderboardList = document.getElementById("leaderboardList");
 let leaderboardData = [];
 const LEADERBOARD_KEY = "boohaTetrisScores";
@@ -543,7 +549,6 @@ function loadScores(){
     leaderboardData = [];
   }
 }
-
 function saveScoreToLocal(newScore){
   if(!newScore || isNaN(newScore)) return;
   leaderboardData.push({score:newScore, date:Date.now()});
@@ -554,15 +559,13 @@ function saveScoreToLocal(newScore){
   }catch(e){}
   renderLeaderboard();
 }
-
 function renderLeaderboard(){
   if(!leaderboardList) return;
   if(!leaderboardData.length){
     leaderboardList.textContent = "ローカル・ハイスコア：まだありません";
     return;
   }
-  let html = "<div>最新５ゲーム</div>";
-  html += "<div style='margin-top:4px;'>";
+  let html = "<div>最新５ゲーム</div><div style='margin-top:4px;'>";
   leaderboardData.forEach((entry,idx)=>{
     html += `<div>${idx+1}位：${entry.score} 点</div>`;
   });
@@ -704,16 +707,14 @@ function updateParticles(){
 // HUD & QUESTIONS & SCORE
 // =====================
 function updateHud(){
-  if(linesClearedTotal < 0) linesClearedTotal = 0;
-  linesClearedTotal = Math.floor(linesClearedTotal);
   linesCountEl.textContent = linesClearedTotal;
   nextAtEl.textContent = (currentQuestionIndex+1)*10;
   scoreEl.textContent = score;
 }
 
 const questionOverlay = document.getElementById("questionOverlay");
-const questionTextEl = document.getElementById("questionText");
-const continueBtn = document.getElementById("continueBtn");
+const questionTextEl  = document.getElementById("questionText");
+const continueBtn     = document.getElementById("continueBtn");
 
 function maybeTriggerQuestion(){
   const threshold = (currentQuestionIndex+1)*10;
@@ -733,9 +734,9 @@ continueBtn.onclick = ()=>{
   updateHud();
 };
 
-// scoring per lines: 0,1,2,3,4 lines
+// scoring per lines
 // 1 line = 10, 2 lines = 20, 3 lines = 50, 4 lines = 100
-const lineScoreTable = [0, 10, 20, 50, 100];
+const lineScoreTable = [0,10,20,50,100];
 
 // =====================
 // PLACE TETROMINO
@@ -788,7 +789,7 @@ function placeTetromino(){
 let frameCount = 0;
 function loop(){
   rAF = requestAnimationFrame(loop);
-  if(isPaused || isPausedForQuestion || gameOver) return;
+  if(isPaused || isPausedForQuestion || gameOver || !gameStarted) return;
 
   context.clearRect(0,0,canvas.width,canvas.height);
 
@@ -829,22 +830,22 @@ function loop(){
 // MOVEMENT FUNCTIONS
 // =====================
 function moveLeft(){
-  if(gameOver || isPaused || isPausedForQuestion) return;
+  if(!gameStarted || gameOver || isPaused || isPausedForQuestion) return;
   const nc = tetromino.col - 1;
   if(isValidMove(tetromino.matrix,tetromino.row,nc)) tetromino.col = nc;
 }
 function moveRight(){
-  if(gameOver || isPaused || isPausedForQuestion) return;
+  if(!gameStarted || gameOver || isPaused || isPausedForQuestion) return;
   const nc = tetromino.col + 1;
   if(isValidMove(tetromino.matrix,tetromino.row,nc)) tetromino.col = nc;
 }
 function rotatePiece(){
-  if(gameOver || isPaused || isPausedForQuestion) return;
+  if(!gameStarted || gameOver || isPaused || isPausedForQuestion) return;
   const rot = rotate(tetromino.matrix);
   if(isValidMove(rot,tetromino.row,tetromino.col)) tetromino.matrix = rot;
 }
 function softDrop(){
-  if(gameOver || isPaused || isPausedForQuestion) return;
+  if(!gameStarted || gameOver || isPaused || isPausedForQuestion) return;
   const nr = tetromino.row + 1;
   if(isValidMove(tetromino.matrix,nr,tetromino.col)){
     tetromino.row = nr;
@@ -857,21 +858,13 @@ function softDrop(){
 // KEYBOARD (DESKTOP)
 // =====================
 document.addEventListener("keydown", e=>{
-  ensureBgm();
+  if(!gameStarted) return;
   if(gameOver || isPaused || isPausedForQuestion) return;
 
-  if(e.key==="ArrowLeft"){
-    moveLeft();
-  }
-  if(e.key==="ArrowRight"){
-    moveRight();
-  }
-  if(e.key==="ArrowUp"){
-    rotatePiece();
-  }
-  if(e.key==="ArrowDown"){
-    softDrop();
-  }
+  if(e.key==="ArrowLeft")  moveLeft();
+  if(e.key==="ArrowRight") moveRight();
+  if(e.key==="ArrowUp")    rotatePiece();
+  if(e.key==="ArrowDown")  softDrop();
 });
 
 // =====================
@@ -885,12 +878,12 @@ const moveDownBtn  = document.getElementById("moveDownBtn");
 function attachControl(btn, handler){
   if(!btn) return;
   btn.addEventListener("click", ()=>{
-    ensureBgm();
+    if(!gameStarted) return;
     handler();
   });
   btn.addEventListener("touchstart", (e)=>{
     e.preventDefault();
-    ensureBgm();
+    if(!gameStarted) return;
     handler();
   }, {passive:false});
 }
@@ -903,23 +896,24 @@ attachControl(moveDownBtn,  softDrop);
 // =====================
 // PAUSE
 // =====================
-const pauseBtn = document.getElementById("pauseBtn");
+const pauseBtn     = document.getElementById("pauseBtn");
 const pauseOverlay = document.getElementById("pauseOverlay");
 
 function pauseGame(){
-  if(gameOver) return;
+  if(!gameStarted || gameOver) return;
   isPaused = true;
   pauseOverlay.style.display = "flex";
   if(bgmStarted) bgm.volume = 0.25;
 }
 function resumeGame(){
+  if(!gameStarted) return;
   isPaused = false;
   pauseOverlay.style.display = "none";
   if(bgmStarted) bgm.volume = 0.55;
 }
 
 pauseBtn.onclick = ()=>{
-  ensureBgm();
+  if(!gameStarted) return;
   if(isPaused) resumeGame(); else pauseGame();
 };
 pauseOverlay.onclick = resumeGame;
@@ -927,12 +921,12 @@ pauseOverlay.onclick = resumeGame;
 // =====================
 // HELP
 // =====================
-const helpBtn = document.getElementById("helpBtn");
-const helpOverlay = document.getElementById("helpOverlay");
-const helpClose = document.getElementById("helpClose");
+const helpBtn      = document.getElementById("helpBtn");
+const helpOverlay  = document.getElementById("helpOverlay");
+const helpClose    = document.getElementById("helpClose");
 
 helpBtn.onclick = ()=>{
-  ensureBgm();
+  if(!gameStarted || gameOver) return;
   pauseGame();
   helpOverlay.style.display = "flex";
 };
@@ -944,12 +938,12 @@ helpClose.onclick = ()=>{
 // =====================
 // LEADERBOARD POPUP
 // =====================
-const trophyBtn = document.getElementById("trophyBtn");
+const trophyBtn         = document.getElementById("trophyBtn");
 const leaderboardOverlay = document.getElementById("leaderboardOverlay");
-const leaderClose = document.getElementById("leaderClose");
+const leaderClose       = document.getElementById("leaderClose");
 
 function openLeaderboard(){
-  ensureBgm();
+  if(!gameStarted) return;
   pauseGame();
   renderLeaderboard();
   leaderboardOverlay.style.display = "flex";
@@ -1000,13 +994,12 @@ renderLeaderboard();
 updateHud();
 
 const startOverlay = document.getElementById("startOverlay");
-let gameStarted = false;
 
 function startGame(){
   if(gameStarted) return;
   gameStarted = true;
-  ensureBgm();
   startOverlay.style.display = "none";
+  ensureBgm();
   rAF = requestAnimationFrame(loop);
 }
 
@@ -1016,5 +1009,3 @@ startOverlay.addEventListener("touchstart", function(e){
   startGame();
 },{passive:false});
 </script>
-</body>
-</html>
