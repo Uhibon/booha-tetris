@@ -554,7 +554,6 @@ sfxClear.volume = 0.9;
 const canvas = document.getElementById("game");
 const context = canvas.getContext("2d");
 const grid = 32;
-
 // =====================
 // DYNAMIC HUB SCALING
 // =====================
@@ -563,25 +562,31 @@ const shell = document.querySelector(".shell");
 function fitShellToViewport(){
   if (!shell) return;
 
-  // Reset first so we measure natural height
+  // Reset so we measure the natural size
   shell.style.transform = "scale(1)";
   shell.style.transformOrigin = "top center";
 
-  // Measure the space
   const rect = shell.getBoundingClientRect();
-  const margin = 16; // breathing room so buttons aren't cut
-  const available = window.innerHeight - margin;
 
-  // Calculate scale: never enlarge, only shrink
+  // Extra space for URL bar + gesture bar so buttons never touch the edge
+  const safePadding = 96; // px
+  const available = window.innerHeight - safePadding;
+
+  // Only shrink, never enlarge
   const scale = Math.min(1, available / rect.height);
 
   shell.style.transform = `scale(${scale})`;
 }
 
-// Run scaling on load + resize + rotation
-window.addEventListener("load", fitShellToViewport);
+// Run scaling on load + resize + rotation (with a small delay for browser chrome)
+window.addEventListener("load", () => {
+  fitShellToViewport();
+  setTimeout(fitShellToViewport, 150);
+});
 window.addEventListener("resize", fitShellToViewport);
-window.addEventListener("orientationchange", fitShellToViewport);
+window.addEventListener("orientationchange", () => {
+  setTimeout(fitShellToViewport, 150);
+});
 
 let rAF = null;
 let gameOver = false;
