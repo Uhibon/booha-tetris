@@ -125,7 +125,7 @@ h1 span{
   text-shadow:0 0 6px #ff7eb9;
 }
 
-/* Mobile rotate button */
+/* Mobile/Tablet rotate button (also visible on desktop – that’s fine) */
 #rotateBtn{
   position:absolute;
   right:10px;
@@ -143,14 +143,6 @@ h1 span{
   color:#111827;
   cursor:pointer;
   z-index:14;
-}
-
-/* Hide on desktop, show on mobile */
-@media (min-width:601px){
-  #rotateBtn{ display:none; }
-}
-@media (max-width:600px){
-  #rotateBtn{ display:flex; }
 }
 
 /* CANVAS */
@@ -424,7 +416,7 @@ h1 span{
     ローカル・ハイスコア：まだありません
   </div>
 
-  <!-- Mobile rotate button -->
+  <!-- Rotate button (mobile/tablet/desktop) -->
   <div id="rotateBtn">↻</div>
 </div>
 
@@ -765,9 +757,9 @@ function loop(){
 }
 
 // =====================
-// TOUCH CONTROLS (MOBILE DRAG ONLY)
-//  ・Finger ON the piece = drag left/right/down
-//  ・Rotation only from the glowing circle button
+// TOUCH CONTROLS (DRAG-ON-PIECE)
+//  Finger ON the piece = drag left/right/down
+//  Rotation only from the ↻ button
 // =====================
 let draggingPiece = false;
 let lastTouchX = 0;
@@ -803,14 +795,16 @@ canvas.addEventListener("touchstart", e=>{
 
   const rect = canvas.getBoundingClientRect();
   const t = e.touches[0];
-  const cx = t.clientX - rect.left;
-  const cy = t.clientY - rect.top;
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const cx = (t.clientX - rect.left) * scaleX;
+  const cy = (t.clientY - rect.top) * scaleY;
 
   const bounds = getPieceBounds();
+  const margin = grid; // allow a bit of forgiveness around the piece
 
-  // Only start dragging if finger is actually on the piece
-  if(cx >= bounds.left && cx <= bounds.right &&
-     cy >= bounds.top  && cy <= bounds.bottom){
+  if(cx >= bounds.left - margin && cx <= bounds.right + margin &&
+     cy >= bounds.top  - margin && cy <= bounds.bottom + margin){
     draggingPiece = true;
     lastTouchX = cx;
     lastTouchY = cy;
@@ -827,8 +821,10 @@ canvas.addEventListener("touchmove", e=>{
 
   const rect = canvas.getBoundingClientRect();
   const t = e.touches[0];
-  const cx = t.clientX - rect.left;
-  const cy = t.clientY - rect.top;
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const cx = (t.clientX - rect.left) * scaleX;
+  const cy = (t.clientY - rect.top) * scaleY;
 
   const dx = cx - lastTouchX;
   const dy = cy - lastTouchY;
@@ -839,7 +835,7 @@ canvas.addEventListener("touchmove", e=>{
   accumX += dx;
   accumY += dy;
 
-  const stepX = 14; // smaller = more responsive
+  const stepX = 14;
   const stepY = 16;
 
   // Horizontal: move 1 column per stepX
@@ -880,7 +876,7 @@ canvas.addEventListener("touchend", ()=>{
 });
 
 // =====================
-// ROTATE BUTTON (MOBILE)
+// ROTATE BUTTON
 // =====================
 const rotateBtn = document.getElementById("rotateBtn");
 if(rotateBtn){
