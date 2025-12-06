@@ -19,6 +19,7 @@ body{
   background:radial-gradient(circle at top,#1f2937 0%,#020617 55%,#000 100%);
   font-family:'Noto Sans JP',system-ui,sans-serif;
   color:#f9fafb;
+  overflow:hidden;
 }
 
 /* PHONE SHELL */
@@ -80,35 +81,25 @@ h1 span{
   margin-top:4px;
 }
 
-/* TOP BUTTONS (help, pause, trophy) */
-#helpBtn,#pauseBtn,#trophyBtn{
+/* TOP BUTTONS */
+#helpBtn,#pauseBtn{
   position:absolute;
   top:8px;
   width:36px;
   height:36px;
   border-radius:50%;
   border:1px solid var(--gold);
+  background:linear-gradient(135deg,var(--pink),var(--aqua));
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:18px;
+  font-size:20px;
   cursor:pointer;
   box-shadow:0 0 12px rgba(255,255,255,0.7);
   z-index:15;
 }
-#helpBtn{
-  left:8px;
-  background:linear-gradient(135deg,var(--pink),var(--aqua));
-  font-size:20px;
-}
-#pauseBtn{
-  right:8px;
-  background:linear-gradient(135deg,var(--pink),var(--aqua));
-}
-#trophyBtn{
-  right:52px;
-  background:radial-gradient(circle at 30% 20%, #fef9c3,#fed7aa 40%,#fb923c 80%);
-}
+#helpBtn{left:8px;}
+#pauseBtn{right:8px;}
 
 /* HUD */
 .hud-row{
@@ -127,7 +118,7 @@ h1 span{
   text-shadow:0 0 6px #ff7eb9;
 }
 
-/* CANVAS */
+/* GAME CANVAS */
 #game{
   margin-top:4px;
   border-radius:18px;
@@ -136,40 +127,6 @@ h1 span{
   box-shadow:0 0 22px rgba(59,130,246,0.55);
   image-rendering:pixelated;
   touch-action:none;
-}
-
-/* MOBILE / TABLET CONTROL PAD */
-#mobileControls,
-#mobileDownRow{
-  width:100%;
-  display:none; /* shown only on mobile/tablet */
-  justify-content:center;
-  gap:10px;
-  margin-top:6px;
-}
-
-.ctrl-btn{
-  width:52px;
-  height:52px;
-  border-radius:50%;
-  border:1px solid var(--gold);
-  background:radial-gradient(circle at 30% 20%, #ffffff, #e0f2fe 40%, #38bdf8 80%);
-  box-shadow:0 0 14px rgba(56,189,248,0.85);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:22px;
-  color:#0f172a;
-  cursor:pointer;
-}
-.ctrl-btn.wide{
-  width:90px;
-}
-
-/* Make rotate button look special but still a ctrl-btn */
-#rotateBtn{
-  background:radial-gradient(circle at 30% 20%, #ffffff, #ffe4e6 40%, #f472b6 80%);
-  box-shadow:0 0 18px rgba(244,114,182,0.9);
 }
 
 /* FLOATING SPARKLES */
@@ -195,6 +152,39 @@ h1 span{
   20%{opacity:1;}
   80%{opacity:1;}
   100%{transform:translateY(-40%) scale(1.05);opacity:0;}
+}
+
+/* MOBILE BUTTON PAD */
+#mobileControls,
+#mobileDownRow{
+  display:none;
+  width:100%;
+  justify-content:center;
+  gap:12px;
+  margin-top:10px;
+}
+
+.mob-btn{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  border:1px solid var(--gold);
+  background:linear-gradient(135deg,var(--pink),var(--aqua));
+  box-shadow:0 0 12px rgba(255,255,255,0.7);
+  font-size:22px;
+  color:#111827;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+
+/* SHOW BUTTONS ON ALL MOBILE + TABLETS */
+@media(max-width:1366px){
+  #mobileControls,
+  #mobileDownRow{
+    display:flex;
+  }
 }
 
 /* PAUSE OVERLAY */
@@ -256,55 +246,14 @@ h1 span{
   cursor:pointer;
   box-shadow:0 0 8px rgba(255,255,255,0.7);
 }
-.help-section{
-  margin-top:6px;
-  line-height:1.5;
-}
 
-/* LEADERBOARD OVERLAY (trophy popup) */
-#leaderboardOverlay{
-  position:absolute;
-  inset:0;
-  border-radius:24px;
-  background:rgba(0,0,15,0.88);
-  backdrop-filter:blur(6px);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:40;
-}
-.lb-card{
-  width:88%;
-  max-width:360px;
-  padding:18px 20px 16px;
-  border-radius:18px;
-  background:radial-gradient(circle,#111827,#020617 60%);
-  border:1px solid rgba(255,255,255,0.3);
-  color:#e5e7eb;
-  font-size:0.8rem;
-  position:relative;
-}
-.lb-title{
-  font-family:'Cinzel';
+/* LEADERBOARD */
+#leaderboardBox{
+  width:100%;
+  margin-top:6px;
+  font-size:0.75rem;
   text-align:center;
-  font-size:1.05rem;
-  margin-bottom:8px;
-}
-#lbClose{
-  position:absolute;
-  top:8px;
-  right:8px;
-  width:26px;
-  height:26px;
-  border-radius:50%;
-  background:linear-gradient(135deg,var(--pink),var(--aqua));
-  border:1px solid var(--gold);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:16px;
-  cursor:pointer;
-  box-shadow:0 0 8px rgba(255,255,255,0.7);
+  color:#e5e7eb;
 }
 
 /* QUESTION OVERLAY */
@@ -330,27 +279,6 @@ h1 span{
   font-family:'Cinzel';
   font-size:1.1rem;
   text-align:center;
-}
-.q-sub{
-  text-align:center;
-  font-size:0.8rem;
-  color:#a5b4fc;
-  margin-bottom:8px;
-}
-#questionText{
-  font-size:0.85rem;
-  line-height:1.5;
-  margin-bottom:10px;
-}
-#continueBtn{
-  width:100%;
-  border:none;
-  border-radius:999px;
-  padding:8px;
-  font-size:0.85rem;
-  font-weight:700;
-  cursor:pointer;
-  background:linear-gradient(135deg,#f97316,#fb7185,#e879f9);
 }
 
 /* START OVERLAY */
@@ -378,134 +306,37 @@ h1 span{
   margin-bottom:6px;
 }
 
-/* MOBILE & TABLET */
-@media(max-width:1024px){
-  #mobileControls,
-  #mobileDownRow{
-    display:flex;
-  }
-}
+/* PHONES */
 @media(max-width:600px){
   body{
     align-items:flex-start;
   }
   .shell{
-    transform:scale(0.86);
+    transform:scale(0.9);
     transform-origin: top center;
     max-height:none;
     margin-top:8px;
     margin-bottom:16px;
   }
   #game{
-    height:540px;
+    height:520px;
+  }
+}
+
+/* TABLETS */
+@media(min-width:601px) and (max-width:1366px){
+  body{
+    align-items:center;
+    justify-content:center;
+  }
+  .shell{
+    transform:scale(1);
+    transform-origin:center center;
+    max-height:94vh;
+    margin:8px 0;
   }
 }
 </style>
-<body>
-
-<!-- Tap-to-start fullscreen overlay -->
-<div id="startOverlay">
-  <div id="startOverlayInner">
-    <span class="big">画面をタップしてスタート</span>
-    ブロックを動かしてラインを消そう！<br>
-    １０ラインごとにブーハクイズが出てくるよ。
-  </div>
-</div>
-
-<div class="shell">
-
-  <h1>
-    BOOHA TETRIS
-    <span>１月のれんしゅう</span>
-  </h1>
-
-  <!-- Top buttons -->
-  <div id="helpBtn">？</div>
-  <div id="pauseBtn">⏸</div>
-  <div id="trophyBtn">🏆</div>
-
-  <!-- HUD rows -->
-  <div class="hud-row">
-    <div><span class="label">ライン数：</span><span id="linesCount" class="value">0</span></div>
-    <div><span class="label">次のクイズ：</span><span id="nextAt" class="next">10</span><span class="label"> ライン目</span></div>
-  </div>
-  <div class="hud-row">
-    <div><span class="label">スコア：</span><span id="scoreValue" class="value">0</span></div>
-    <div></div>
-  </div>
-
-  <!-- Game canvas -->
-  <canvas id="game" width="320" height="640"></canvas>
-
-  <!-- Sparkles -->
-  <div class="sparkle-overlay">
-    <div class="spark" style="left:12%;"></div>
-    <div class="spark" style="left:32%;"></div>
-    <div class="spark" style="left:52%;"></div>
-    <div class="spark" style="left:72%;"></div>
-    <div class="spark" style="left:88%;"></div>
-  </div>
-
-  <!-- Pause overlay -->
-  <div id="pauseOverlay">
-    <div>タップしてゲームに戻る</div>
-  </div>
-
-  <!-- Help overlay -->
-  <div id="helpOverlay">
-    <div class="help-card">
-      <div id="helpClose">✕</div>
-      <div class="help-title">How to Play ／ 遊び方</div>
-
-      <div class="help-section">
-        <strong>English</strong><br>
-        ・Use the buttons under the game to move ←, rotate ↻, move →, and drop ↓<br>
-        ・Clear lines to get points<br>
-        ・Every 10 lines opens a Booha Question
-      </div>
-
-      <div class="help-section">
-        <strong>日本語</strong><br>
-        ・ゲームの下のボタンで操作します：←（左）、↻（回転）、→（右）、↓（下）<br>
-        ・ラインを消すとポイントが入ります<br>
-        ・１０ラインごとに「ブーハクイズ」が開きます
-      </div>
-    </div>
-  </div>
-
-  <!-- Leaderboard overlay (trophy popup) -->
-  <div id="leaderboardOverlay">
-    <div class="lb-card">
-      <div id="lbClose">✕</div>
-      <div class="lb-title">ローカル・ハイスコア</div>
-      <div id="leaderboardBox">
-        ローカル・ハイスコア：まだありません
-      </div>
-    </div>
-  </div>
-
-  <!-- Mobile / tablet control pad -->
-  <div id="mobileControls">
-    <div id="moveLeftBtn" class="ctrl-btn">←</div>
-    <div id="rotateBtn" class="ctrl-btn">↻</div>
-    <div id="moveRightBtn" class="ctrl-btn">→</div>
-  </div>
-  <div id="mobileDownRow">
-    <div id="moveDownBtn" class="ctrl-btn wide">↓</div>
-  </div>
-
-</div>
-
-<!-- Question overlay (global) -->
-<div id="questionOverlay">
-  <div class="q-card">
-    <div class="q-title">Checkpoint</div>
-    <div class="q-sub">Booha Question Gate</div>
-    <div id="questionText"></div>
-    <button id="continueBtn">Continue</button>
-  </div>
-</div>
-<script>
 // =====================
 // AUDIO
 // =====================
