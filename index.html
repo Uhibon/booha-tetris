@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Booha Tetris</title>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
 
 <style>
@@ -133,7 +133,9 @@ h1 span{
   border:1px solid var(--outline);
   box-shadow:0 0 22px rgba(59,130,246,0.55);
   image-rendering:pixelated;
+  touch-action:none; /* prevent double-tap zoom / gestures on canvas */
 }
+
 
 /* FLOATING SPARKLES */
 .sparkle-overlay{
@@ -736,13 +738,16 @@ function loop(){
 }
 
 // =====================
-// TOUCH CONTROLS (TUNED)
-//  ・Tap ON the piece → rotate immediately
-//  ・Press & drag UNDER the piece → move + drop
+// TOUCH CONTROLS (NEW SIMPLE VERSION)
+//  ・Touch / tap ANYWHERE UNDER the blocks
+//      → rotate once immediately
+//      → then drag left/right/down to move
 // =====================
 let pointerMode = null; // 'drag' or null
 let lastDragX = 0;
 let lastDragY = 0;
+let dragAccumX = 0;
+let dragAccumY = 0;
 
 function getPieceBounds(){
   let left = Infinity, right = -Infinity, top = Infinity, bottom = -Infinity;
@@ -777,66 +782,84 @@ canvas.addEventListener("touchstart", e=>{
 
   const bounds = getPieceBounds();
 
-  // 1) Tap directly on the piece → rotate instantly
-  if(cx >= bounds.left && cx <= bounds.right &&
-     cy >= bounds.top  && cy <= bounds.bottom){
-    const rotated = rotate(tetromino.matrix);
-    if(isValidMove(rotated, tetromino.row, tetromino.col)){
-      tetromino.matrix = rotated;
-    }
+  // Only respond to touches clearly UNDER the piece
+  if(cy <= bounds.bottom + grid * 0.2){
     pointerMode = null;
     return;
   }
 
-  // 2) Touch clearly under the piece → drag mode
-  if(cy > bounds.bottom + grid*0.2){
-    pointerMode = "drag";
-    lastDragX = cx;
-    lastDragY = cy;
-  }else{
-    pointerMode = null;
+  // 1) First touch under the piece → rotate once
+  const rotated = rotate(tetromino.matrix);
+  if(isValidMove(rotated, tetromino.row, tetromino.col)){
+    tetromino.matrix = rotated;
   }
+
+  // 2) Enter drag mode
+  pointerMode = "drag";
+  lastDragX = cx;
+  lastDragY = cy;
+  dragAccumX = 0;
+  dragAccumY = 0;
+
+  e.preventDefault();
 },{passive:false});
 
 canvas.addEventListener("touchmove", e=>{
   if(pointerMode !== "drag" || gameOver || isPaused || isPausedForQuestion) return;
-  e.preventDefault();
 
   const rect = canvas.getBoundingClientRect();
   const t = e.touches[0];
   const cx = t.clientX - rect.left;
   const cy = t.clientY - rect.top;
 
-  const dx = cx - lastDragX;
-  const dy = cy - lastDragY;
+  let dx = cx - lastDragX;
+  let dy = cy - lastDragY;
 
-  // Horizontal movement – smaller threshold for snappier feel
-  if(Math.abs(dx) > 12){
-    const dir = dx > 0 ? 1 : -1;
-    const newCol = tetromino.col + dir;
+  lastDragX = cx;
+  lastDragY = cy;
+
+  dragAccumX += dx;
+  dragAccumY += dy;
+
+  // Horizontal movement: every ~12px → move 1 column
+  const stepX = 12;
+  while(dragAccumX > stepX){
+    const newCol = tetromino.col + 1;
     if(isValidMove(tetromino.matrix, tetromino.row, newCol)){
       tetromino.col = newCol;
     }
-    lastDragX = cx;
+    dragAccumX -= stepX;
+  }
+  while(dragAccumX < -stepX){
+    const newCol = tetromino.col - 1;
+    if(isValidMove(tetromino.matrix, tetromino.row, newCol)){
+      tetromino.col = newCol;
+    }
+    dragAccumX += stepX;
   }
 
-  // Vertical drag – pull down faster
-  if(dy > 12){
+  // Vertical movement: drag down faster
+  const stepY = 14;
+  while(dragAccumY > stepY){
     const newRow = tetromino.row + 1;
     if(isValidMove(tetromino.matrix, newRow, tetromino.col)){
       tetromino.row = newRow;
     }else{
       // landed while dragging
       placeTetromino();
+      pointerMode = null;
+      break;
     }
-    lastDragY = cy;
+    dragAccumY -= stepY;
   }
+
+  e.preventDefault();
 },{passive:false});
 
 canvas.addEventListener("touchend", ()=>{
-  // no extra logic now; tap-rotate already happened on touchstart
   pointerMode = null;
 });
+
 
 
 // =====================
