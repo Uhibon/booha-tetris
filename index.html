@@ -548,13 +548,40 @@ bgm.volume = 0.55;
 
 const sfxClear = new Audio("booha-tetris-sound.mp3");
 sfxClear.volume = 0.9;
-
 // =====================
 // CANVAS & GLOBALS
 // =====================
 const canvas = document.getElementById("game");
 const context = canvas.getContext("2d");
 const grid = 32;
+
+// =====================
+// DYNAMIC HUB SCALING
+// =====================
+const shell = document.querySelector(".shell");
+
+function fitShellToViewport(){
+  if (!shell) return;
+
+  // Reset first so we measure natural height
+  shell.style.transform = "scale(1)";
+  shell.style.transformOrigin = "top center";
+
+  // Measure the space
+  const rect = shell.getBoundingClientRect();
+  const margin = 16; // breathing room so buttons aren't cut
+  const available = window.innerHeight - margin;
+
+  // Calculate scale: never enlarge, only shrink
+  const scale = Math.min(1, available / rect.height);
+
+  shell.style.transform = `scale(${scale})`;
+}
+
+// Run scaling on load + resize + rotation
+window.addEventListener("load", fitShellToViewport);
+window.addEventListener("resize", fitShellToViewport);
+window.addEventListener("orientationchange", fitShellToViewport);
 
 let rAF = null;
 let gameOver = false;
