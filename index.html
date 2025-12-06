@@ -355,8 +355,6 @@ h1 span{
 // =====================
 //  AUDIO
 // =====================
-
-// must begin after user gesture (TAP)
 let bgmStarted = false;
 
 const bgm = new Audio("booha-tetris-january.mp3");
@@ -366,6 +364,14 @@ bgm.volume = 0.55;
 const sfxClear = new Audio("booha-tetris-sound.mp3");
 sfxClear.volume = 0.9;
 
+// helper to start bgm once from any input
+function ensureBgm(){
+  if (!bgmStarted) {
+    bgm.play().then(()=>{
+      bgmStarted = true;
+    }).catch(()=>{/* ignore autoplay errors */});
+  }
+}
 
 // =====================
 //  CANVAS + GLOBALS
@@ -385,10 +391,77 @@ const nextAtEl = document.getElementById("nextAt");
 let linesClearedTotal = 0;
 let currentQuestionIndex = 0;
 
+// score + leaderboard
+let score = 0;
+let scoreEl;
+
+// create a JP score display under the HUD
+(function setupScoreDisplay(){
+  const shell = document.querySelector(".shell");
+  const scoreRow = document.createElement("div");
+  scoreRow.style.width = "100%";
+  scoreRow.style.fontSize = "0.8rem";
+  scoreRow.style.marginTop = "4px";
+  scoreRow.style.display = "flex";
+  scoreRow.style.justifyContent = "flex-start";
+  scoreRow.style.gap = "4px";
+  scoreRow.innerHTML = 'スコア：<span id="scoreValue">0</span>';
+  shell.insertBefore(scoreRow, canvas);
+  scoreEl = scoreRow.querySelector("#scoreValue");
+})();
+
+// local leaderboard under the phone
+let leaderboardData = [];
+const LEADERBOARD_KEY = "boohaTetrisScores";
+
+const leaderboardContainer = document.createElement("div");
+leaderboardContainer.style.marginTop = "12px";
+leaderboardContainer.style.fontSize = "0.75rem";
+leaderboardContainer.style.textAlign = "center";
+leaderboardContainer.style.color = "#e5e7eb";
+leaderboardContainer.style.fontFamily = '"Noto Sans JP",sans-serif';
+document.body.appendChild(leaderboardContainer);
+
+function loadScores(){
+  try{
+    const raw = localStorage.getItem(LEADERBOARD_KEY);
+    if(raw){
+      leaderboardData = JSON.parse(raw) || [];
+    }
+  }catch(e){
+    leaderboardData = [];
+  }
+}
+
+function saveScoreToLocal(newScore){
+  if(!newScore || isNaN(newScore)) return;
+  leaderboardData.push({score:newScore, date:Date.now()});
+  leaderboardData.sort((a,b)=>b.score - a.score);
+  leaderboardData = leaderboardData.slice(0,5); // keep top 5
+  try{
+    localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(leaderboardData));
+  }catch(e){}
+  renderLeaderboard();
+}
+
+function renderLeaderboard(){
+  if(!leaderboardData.length){
+    leaderboardContainer.textContent = "ローカル・ハイスコア：まだスコアがありません。";
+    return;
+  }
+  let html = "<div>ローカル・ハイスコア</div>";
+  html += "<div style='margin-top:4px;'>";
+  leaderboardData.forEach((entry, idx)=>{
+    html += `<div>${idx+1}位：${entry.score} 点</div>`;
+  });
+  html += "</div>";
+  leaderboardContainer.innerHTML = html;
+}
+
+// placeholder questions
 const questions = Array.from({length:60}, (_,i)=>
   `Question ${i+1} placeholder — January vocab EN/JP here.`
 );
-
 
 // =====================
 //  PLAYFIELD
@@ -400,7 +473,6 @@ for (let row = -2; row < 20; row++){
     playfield[row][col] = 0;
   }
 }
-
 
 // =====================
 //  TETROMINOS
@@ -424,7 +496,6 @@ const colors = {
   "J":"#a855f7",
   "L":"#f97316"
 };
-
 
 // =====================
 //  SEQUENCE + NEXT PIECE
@@ -454,9 +525,8 @@ function getNextTetromino(){
 
 let tetromino = getNextTetromino();
 
-
 // =====================
-//  ROTATE
+//  ROTATE & COLLISION
 // =====================
 function rotate(matrix){
   const N = matrix.length - 1;
@@ -482,7 +552,6 @@ function isValidMove(matrix, cellRow, cellCol){
   }
   return true;
 }
-
 
 // =====================
 //  PARTICLES (GLITTER)
@@ -527,60 +596,17 @@ function updateParticles(){
   }
 }
 
-
 // =====================
-//  PLACE TETROMINO + CLEAR LINES
-// =====================
-function placeTetromino(){
-  for(let r=0; r<tetromino.matrix.length; r++){
-    for(let c=0; c<tetromino.matrix[r].length; c++){
-      if(tetromino.matrix[r][c]){
-        if(tetromino.row+r < 0){
-          return showGameOver();
-        }
-        playfield[tetromino.row+r][tetromino.col+c] = tetromino.name;
-      }
-    }
-  }
-
-  let cleared = 0;
-
-  for(let r=playfield.length-1; r>=0; ){
-    if(playfield[r].every(val=>!!val)){
-      createSparklesForRow(r);
-      cleared++;
-
-      // play sound
-      sfxClear.currentTime = 0;
-      sfxClear.play();
-
-      for(let rr=r; rr>=0; rr--){
-        for(let cc=0; cc<10; cc++){
-          playfield[rr][cc] = playfield[rr-1]?.[cc] || 0;
-        }
-      }
-    } else {
-      r--;
-    }
-  }
-
-  if(cleared>0){
-    linesClearedTotal += cleared;
-    updateHud();
-    maybeTriggerQuestion();
-  }
-
-  tetromino = getNextTetromino();
-}
-
-
-// =====================
-//  HUD + QUESTIONS
+//  HUD + QUESTIONS + SCORE
 // =====================
 function updateHud(){
+  linesClearedTotal = Math.max(0, linesClearedTotal);
   linesCountEl.textContent = linesClearedTotal;
   const next = (currentQuestionIndex+1)*10;
   nextAtEl.textContent = next;
+  if(scoreEl){
+    scoreEl.textContent = score;
+  }
 }
 
 function maybeTriggerQuestion(){
@@ -596,7 +622,7 @@ const continueBtn = document.getElementById("continueBtn");
 
 function showQuestion(){
   isPausedForQuestion = true;
-  questionTextEl.textContent = questions[currentQuestionIndex];
+  questionTextEl.textContent = questions[currentQuestionIndex] || "Question placeholder.";
   questionOverlay.style.display = "flex";
 }
 
@@ -604,8 +630,58 @@ continueBtn.onclick = ()=>{
   currentQuestionIndex = Math.min(currentQuestionIndex+1, questions.length);
   questionOverlay.style.display = "none";
   isPausedForQuestion = false;
+  updateHud();
 };
 
+// =====================
+//  SCORING TABLE
+// =====================
+const lineScoreTable = [0,100,300,500,800];
+
+// =====================
+//  PLACE TETROMINO + CLEAR LINES
+// =====================
+function placeTetromino(){
+  for(let r=0; r<tetromino.matrix.length; r++){
+    for(let c=0; c<tetromino.matrix[r].length; c++){
+      if(tetromino.matrix[r][c]){
+        if(tetromino.row+r < 0){
+          showGameOver();
+          return;
+        }
+        playfield[tetromino.row+r][tetromino.col+c] = tetromino.name;
+      }
+    }
+  }
+
+  let cleared = 0;
+
+  for(let r=playfield.length-1; r>=0; ){
+    if(playfield[r].every(val=>!!val)){
+      createSparklesForRow(r);
+      cleared++;
+      sfxClear.currentTime = 0;
+      sfxClear.play();
+
+      for(let rr=r; rr>=0; rr--){
+        for(let cc=0; cc<10; cc++){
+          playfield[rr][cc] = playfield[rr-1]?.[cc] || 0;
+        }
+      }
+    } else {
+      r--;
+    }
+  }
+
+  if(cleared>0){
+    linesClearedTotal += cleared;
+    score += lineScoreTable[cleared] || (cleared*100);
+    updateHud();
+    maybeTriggerQuestion();
+  }
+
+  tetromino = getNextTetromino();
+}
 
 // =====================
 //  GAME LOOP
@@ -618,7 +694,6 @@ function loop(){
 
   context.clearRect(0,0,canvas.width,canvas.height);
 
-  // Draw playfield
   for(let r=0; r<20; r++){
     for(let c=0; c<10; c++){
       const cell = playfield[r][c];
@@ -627,10 +702,8 @@ function loop(){
     }
   }
 
-  // Update glitter
   updateParticles();
 
-  // Gravity
   if(++frameCount > 35){
     tetromino.row++;
     frameCount = 0;
@@ -640,7 +713,6 @@ function loop(){
     }
   }
 
-  // Draw active tetromino
   context.fillStyle = colors[tetromino.name];
   for(let r=0; r<tetromino.matrix.length; r++){
     for(let c=0; c<tetromino.matrix[r].length; c++){
@@ -655,7 +727,6 @@ function loop(){
   }
 }
 
-
 // =====================
 //  TOUCH CONTROLS
 // =====================
@@ -665,21 +736,15 @@ let touchStartTime = 0;
 let longPressTriggered = false;
 
 canvas.addEventListener("touchstart", e=>{
-  if(!bgmStarted){
-    bgm.play();
-    bgmStarted = true;
-  }
-
+  ensureBgm();
   const t = e.touches[0];
   touchStartX = t.clientX;
   touchStartY = t.clientY;
   touchStartTime = Date.now();
   longPressTriggered = false;
 
-  // Tap = rotate
   setTimeout(()=>{
-    if(!longPressTriggered && Date.now()-touchStartTime > 350){
-      // long press → hard drop
+    if(!longPressTriggered && Date.now() - touchStartTime > 350){
       hardDrop();
       longPressTriggered = true;
     }
@@ -696,11 +761,10 @@ canvas.addEventListener("touchmove", e=>{
     const newCol = tetromino.col + dir;
     if(isValidMove(tetromino.matrix, tetromino.row, newCol)){
       tetromino.col = newCol;
-      touchStartX = t.clientX; // reset movement threshold
+      touchStartX = t.clientX;
     }
   }
 
-  // swipe down = soft drop
   if(dy > 22){
     const newRow = tetromino.row + 1;
     if(isValidMove(tetromino.matrix, newRow, tetromino.col)){
@@ -712,7 +776,6 @@ canvas.addEventListener("touchmove", e=>{
 
 canvas.addEventListener("touchend", e=>{
   if(!longPressTriggered){
-    // tap rotate
     const rotated = rotate(tetromino.matrix);
     if(isValidMove(rotated, tetromino.row, tetromino.col)){
       tetromino.matrix = rotated;
@@ -720,18 +783,22 @@ canvas.addEventListener("touchend", e=>{
   }
 });
 
+// =====================
+//  HARD DROP
+// =====================
 function hardDrop(){
   while(isValidMove(tetromino.matrix, tetromino.row+1, tetromino.col)){
     tetromino.row++;
   }
+  score += 20; // bonus for hard drop
   placeTetromino();
 }
-
 
 // =====================
 //  KEYBOARD (fallback)
 // =====================
 document.addEventListener("keydown", e=>{
+  ensureBgm();
   if(gameOver || isPaused || isPausedForQuestion) return;
 
   if(e.key==="ArrowLeft"){
@@ -754,34 +821,28 @@ document.addEventListener("keydown", e=>{
   }
 });
 
-
 // =====================
 //  PAUSE SYSTEM
 // =====================
 const pauseBtn = document.getElementById("pauseBtn");
 const pauseOverlay = document.getElementById("pauseOverlay");
 
-pauseBtn.onclick = ()=>{
-  if(isPaused){
-    resumeGame();
-  } else {
-    pauseGame();
-  }
-};
-
-pauseOverlay.onclick = resumeGame;
-
 function pauseGame(){
   isPaused = true;
   pauseOverlay.style.display = "flex";
-  bgm.volume = 0.25;
+  if(bgmStarted) bgm.volume = 0.25;
 }
 function resumeGame(){
   isPaused = false;
   pauseOverlay.style.display = "none";
-  bgm.volume = 0.55;
+  if(bgmStarted) bgm.volume = 0.55;
 }
 
+pauseBtn.onclick = ()=>{
+  ensureBgm();
+  if(isPaused){ resumeGame(); } else { pauseGame(); }
+};
+pauseOverlay.onclick = resumeGame;
 
 // =====================
 //  HELP SYSTEM
@@ -791,6 +852,7 @@ const helpOverlay = document.getElementById("helpOverlay");
 const helpClose = document.getElementById("helpClose");
 
 helpBtn.onclick = ()=>{
+  ensureBgm();
   pauseGame();
   helpOverlay.style.display = "flex";
 };
@@ -799,13 +861,16 @@ helpClose.onclick = ()=>{
   resumeGame();
 };
 
-
 // =====================
 //  GAME OVER
 // =====================
 function showGameOver(){
+  if(gameOver) return;
   gameOver = true;
   cancelAnimationFrame(rAF);
+
+  // save score and update leaderboard
+  saveScoreToLocal(score);
 
   context.fillStyle = "rgba(0,0,0,0.7)";
   context.fillRect(0, canvas.height/2-40, canvas.width, 80);
@@ -816,13 +881,11 @@ function showGameOver(){
   context.fillText("GAME OVER", canvas.width/2, canvas.height/2);
 }
 
-
 // =====================
 //  INIT
 // =====================
+loadScores();
+renderLeaderboard();
 updateHud();
 rAF = requestAnimationFrame(loop);
 </script>
-
-</body>
-</html>
