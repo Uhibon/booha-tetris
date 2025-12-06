@@ -126,10 +126,10 @@ h1 span{
 }
 
 /* Mobile/Tablet rotate button (also visible on desktop – that’s fine) */
+/* Rotate button – same look, but moved below the game area */
 #rotateBtn{
-  position:absolute;
-  right:10px;
-  bottom:10px;
+  align-self:flex-end;         /* bottom-right inside the shell layout */
+  margin-top:6px;              /* small gap under the canvas/leaderboard */
   width:52px;
   height:52px;
   border-radius:50%;
@@ -800,20 +800,14 @@ canvas.addEventListener("touchstart", e=>{
   const cx = (t.clientX - rect.left) * scaleX;
   const cy = (t.clientY - rect.top) * scaleY;
 
-  const bounds = getPieceBounds();
-  const margin = grid; // allow a bit of forgiveness around the piece
+  // Start dragging from anywhere on the canvas
+  draggingPiece = true;
+  lastTouchX = cx;
+  lastTouchY = cy;
+  accumX = 0;
+  accumY = 0;
 
-  if(cx >= bounds.left - margin && cx <= bounds.right + margin &&
-     cy >= bounds.top  - margin && cy <= bounds.bottom + margin){
-    draggingPiece = true;
-    lastTouchX = cx;
-    lastTouchY = cy;
-    accumX = 0;
-    accumY = 0;
-    e.preventDefault();
-  }else{
-    draggingPiece = false;
-  }
+  e.preventDefault();
 },{passive:false});
 
 canvas.addEventListener("touchmove", e=>{
