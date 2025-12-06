@@ -736,11 +736,11 @@ function loop(){
 }
 
 // =====================
-// TOUCH CONTROLS
-//  tap on piece -> rotate
-//  drag under piece -> move + drop
+// TOUCH CONTROLS (TUNED)
+//  ・Tap ON the piece → rotate immediately
+//  ・Press & drag UNDER the piece → move + drop
 // =====================
-let pointerMode = null; // 'rotate' or 'drag'
+let pointerMode = null; // 'drag' or null
 let lastDragX = 0;
 let lastDragY = 0;
 
@@ -751,16 +751,16 @@ function getPieceBounds(){
       if(tetromino.matrix[r][c]){
         const drawRow = tetromino.row + r;
         if(drawRow < 0) continue;
-        const x = (tetromino.col+c)*grid;
-        const y = drawRow*grid;
-        left = Math.min(left,x);
-        right = Math.max(right,x+grid);
-        top = Math.min(top,y);
-        bottom = Math.max(bottom,y+grid);
+        const x = (tetromino.col + c) * grid;
+        const y = drawRow * grid;
+        left   = Math.min(left,   x);
+        right  = Math.max(right,  x + grid);
+        top    = Math.min(top,    y);
+        bottom = Math.max(bottom, y + grid);
       }
     }
   }
-  if(left===Infinity){
+  if(left === Infinity){
     return {left:0,right:0,top:0,bottom:0};
   }
   return {left,right,top,bottom};
@@ -769,6 +769,7 @@ function getPieceBounds(){
 canvas.addEventListener("touchstart", e=>{
   ensureBgm();
   if(gameOver || isPaused || isPausedForQuestion) return;
+
   const rect = canvas.getBoundingClientRect();
   const t = e.touches[0];
   const cx = t.clientX - rect.left;
@@ -776,9 +777,19 @@ canvas.addEventListener("touchstart", e=>{
 
   const bounds = getPieceBounds();
 
-  if(cx>=bounds.left && cx<=bounds.right && cy>=bounds.top && cy<=bounds.bottom){
-    pointerMode = "rotate";
-  }else if(cy > bounds.bottom + grid*0.3){
+  // 1) Tap directly on the piece → rotate instantly
+  if(cx >= bounds.left && cx <= bounds.right &&
+     cy >= bounds.top  && cy <= bounds.bottom){
+    const rotated = rotate(tetromino.matrix);
+    if(isValidMove(rotated, tetromino.row, tetromino.col)){
+      tetromino.matrix = rotated;
+    }
+    pointerMode = null;
+    return;
+  }
+
+  // 2) Touch clearly under the piece → drag mode
+  if(cy > bounds.bottom + grid*0.2){
     pointerMode = "drag";
     lastDragX = cx;
     lastDragY = cy;
@@ -788,8 +799,9 @@ canvas.addEventListener("touchstart", e=>{
 },{passive:false});
 
 canvas.addEventListener("touchmove", e=>{
-  if(pointerMode!=="drag" || gameOver || isPaused || isPausedForQuestion) return;
+  if(pointerMode !== "drag" || gameOver || isPaused || isPausedForQuestion) return;
   e.preventDefault();
+
   const rect = canvas.getBoundingClientRect();
   const t = e.touches[0];
   const cx = t.clientX - rect.left;
@@ -798,7 +810,8 @@ canvas.addEventListener("touchmove", e=>{
   const dx = cx - lastDragX;
   const dy = cy - lastDragY;
 
-  if(Math.abs(dx) > 16){
+  // Horizontal movement – smaller threshold for snappier feel
+  if(Math.abs(dx) > 12){
     const dir = dx > 0 ? 1 : -1;
     const newCol = tetromino.col + dir;
     if(isValidMove(tetromino.matrix, tetromino.row, newCol)){
@@ -807,26 +820,24 @@ canvas.addEventListener("touchmove", e=>{
     lastDragX = cx;
   }
 
-  if(dy > 16){
+  // Vertical drag – pull down faster
+  if(dy > 12){
     const newRow = tetromino.row + 1;
     if(isValidMove(tetromino.matrix, newRow, tetromino.col)){
       tetromino.row = newRow;
     }else{
+      // landed while dragging
       placeTetromino();
     }
     lastDragY = cy;
   }
 },{passive:false});
 
-canvas.addEventListener("touchend", e=>{
-  if(pointerMode==="rotate" && !gameOver && !isPaused && !isPausedForQuestion){
-    const rotated = rotate(tetromino.matrix);
-    if(isValidMove(rotated, tetromino.row, tetromino.col)){
-      tetromino.matrix = rotated;
-    }
-  }
+canvas.addEventListener("touchend", ()=>{
+  // no extra logic now; tap-rotate already happened on touchstart
   pointerMode = null;
 });
+
 
 // =====================
 // KEYBOARD (DESKTOP)
