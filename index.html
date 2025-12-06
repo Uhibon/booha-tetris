@@ -30,7 +30,7 @@
     color:#f9fafb;
   }
 
-  /* PHONE SHELL – grow as big as viewport allows */
+  /* PHONE SHELL – width by device, height by viewport, can scale on short screens */
   .shell{
     position:relative;
     padding:18px 22px 24px;
@@ -42,7 +42,6 @@
     align-items:center;
     gap:10px;
 
-    /* big as possible but keep phone-ish shape */
     width:min(480px, 100vw - 24px);
     max-height:96vh;
   }
@@ -64,6 +63,20 @@
   @keyframes orbGlow{
     0%{transform:translate3d(-4px,-4px,0) scale(1);}
     100%{transform:translate3d(4px,4px,0) scale(1.02);}
+  }
+
+  /* If the screen is short, scale the whole hub down a bit so buttons fit */
+  @media (max-height:780px){
+    .shell{
+      transform:scale(0.9);
+      transform-origin: top center;
+    }
+  }
+  @media (max-height:700px){
+    .shell{
+      transform:scale(0.82);
+      transform-origin: top center;
+    }
   }
 
   /* TITLE */
@@ -127,7 +140,7 @@
     text-shadow:0 0 6px #ff7eb9;
   }
 
-  /* GAME CANVAS – scale to shell width */
+  /* GAME CANVAS – fills shell width, tall aspect */
   #game{
     margin-top:8px;
     border-radius:18px;
@@ -140,7 +153,7 @@
     touch-action:none;
     width:100%;
     height:auto;
-    aspect-ratio:1/2; /* keep tall phone aspect */
+    aspect-ratio:1/2;
   }
 
   /* FLOATING SPARKLES */
@@ -346,18 +359,6 @@
       0 0 80px rgba(56,189,248,0.6);
     color:#f9fafb;
   }
-  .q-title{
-    font-family:'Cinzel',serif;
-    font-size:1.05rem;
-    text-align:center;
-    text-transform:uppercase;
-    letter-spacing:0.16em;
-    margin-bottom:8px;
-    color:#fefce8;
-    text-shadow:
-      0 0 6px rgba(250,204,21,0.9),
-      0 0 14px rgba(250,250,250,0.8);
-  }
 
   /* START OVERLAY */
   #startOverlay{
@@ -517,7 +518,7 @@ document.addEventListener('gestureend', e => e.preventDefault());
 // =====================
 // AUDIO
 // =====================
-let gameStarted = false;   // after tap
+let gameStarted = false;   // after tap & countdown
 let bgmStarted  = false;
 
 const bgm = new Audio("booha-tetris-january.mp3");
@@ -585,7 +586,7 @@ function renderLeaderboard(){
   leaderboardList.innerHTML = html;
 }
 
-// helper for future quiz scoring
+// future quiz scoring hook
 function addQuizScore(points){
   quizScore += points;
   updateHud();
@@ -727,7 +728,7 @@ function updateParticles(){
 function updateHud(){
   linesCountEl.textContent = linesClearedTotal;
   nextAtEl.textContent = (currentQuestionIndex+1)*10;
-  scoreEl.textContent = score + quizScore; // total
+  scoreEl.textContent = score + quizScore; // total score
 }
 
 const questionOverlay = document.getElementById("questionOverlay");
@@ -1017,11 +1018,6 @@ function startGame(){
   if(gameStarted) return;
   gameStarted = true;
 
-  // start music immediately (still in tap gesture)
-  if(!bgmStarted){
-    bgm.play().then(()=>{ bgmStarted = true; }).catch(()=>{});
-  }
-
   let count = 3;
   startInner.innerHTML = `<span class="big">${count}</span>`;
 
@@ -1032,6 +1028,12 @@ function startGame(){
     }else{
       clearInterval(timer);
       startInner.innerHTML = `<span class="big">GO!</span>`;
+
+      // start BGM and blocks together
+      if(!bgmStarted){
+        bgm.play().then(()=>{ bgmStarted = true; }).catch(()=>{});
+      }
+
       setTimeout(()=>{
         startOverlay.style.display = "none";
         rAF = requestAnimationFrame(loop);
