@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
 <meta charset="UTF-8">
 <title>Booha Tetris</title>
@@ -16,27 +16,35 @@
 
 /* RESET */
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{height:100%;overflow:hidden;}
+html,body{
+  height:100%;
+  width:100%;
+}
 body{
-  display:flex;align-items:center;justify-content:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   background:radial-gradient(circle at top,#1f2937 0%,#020617 55%,#000 100%);
-  font-family:'Noto Sans JP',sans-serif;color:#fff;
+  font-family:'Noto Sans JP',system-ui,sans-serif;
+  color:#f9fafb;
 }
 
 /* PHONE SHELL */
 .shell{
   position:relative;
-  padding:18px 22px 24px;
+  padding:18px 22px 22px;
   border-radius:24px;
   background:radial-gradient(circle at top,rgba(148,163,255,0.25),rgba(15,23,42,0.98));
   border:1px solid rgba(148,163,255,0.5);
-  box-shadow:0 0 40px rgba(56,189,248,0.45),
-              0 0 80px rgba(248,250,252,0.08);
-  display:flex;flex-direction:column;align-items:center;gap:10px;
+  box-shadow:0 0 40px rgba(56,189,248,0.45),0 0 80px rgba(248,250,252,0.08);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
   overflow:hidden;
+  max-height:96vh;
 }
 
-/* MUSIC-SYNCED PULSE */
 .shell::before{
   content:"";
   position:absolute;
@@ -48,8 +56,7 @@ body{
     radial-gradient(circle at 100% 100%,rgba(56,189,248,0.24),transparent 60%);
   filter:blur(10px);
   opacity:0.9;
-  animation:pulseBeat .8s infinite ease-in-out,
-           orbGlow 6s infinite alternate;
+  animation:pulseBeat .8s infinite ease-in-out, orbGlow 6s infinite alternate;
 }
 
 @keyframes pulseBeat{
@@ -64,35 +71,56 @@ body{
 
 /* TITLE */
 h1{
-  font-family:'Cinzel',serif;
-  font-size:1.15rem;
-  letter-spacing:0.12em;
-  text-transform:uppercase;
-  font-weight:900;
-  text-align:center;
   width:100%;
-  text-shadow:0 0 10px #fff;
+  text-align:center;
+  font-family:'Cinzel',serif;
+  font-weight:900;
+  letter-spacing:0.14em;
+  font-size:1.1rem;
+  text-transform:uppercase;
+  text-shadow:0 0 10px #ffffffcc;
 }
 h1 span{
   display:block;
-  font-size:0.85rem;
-  color:#a5b4fc;
+  font-size:0.8rem;
   letter-spacing:0.22em;
+  color:#a5b4fc;
   margin-top:4px;
 }
 
-/* HUD JP */
-.hud{
+/* TOP BUTTONS */
+#helpBtn,#pauseBtn{
+  position:absolute;
+  top:8px;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  border:1px solid var(--gold);
+  background:linear-gradient(135deg,var(--pink),var(--aqua));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  cursor:pointer;
+  box-shadow:0 0 12px rgba(255,255,255,0.7);
+  z-index:15;
+}
+#helpBtn{left:8px;}
+#pauseBtn{right:8px;}
+
+/* HUD */
+.hud-row{
   width:100%;
   display:flex;
   justify-content:space-between;
-  font-size:0.82rem;
+  font-size:0.8rem;
 }
-.hud .value{
+.hud-row .label{opacity:0.8;}
+.hud-row .value{
   color:var(--gold);
   text-shadow:0 0 6px #ffd166;
 }
-.hud .next{
+.hud-row .next{
   color:var(--pink);
   text-shadow:0 0 6px #ff7eb9;
 }
@@ -132,129 +160,96 @@ h1 span{
   100%{transform:translateY(-40%) scale(1.05);opacity:0;}
 }
 
-/* PAUSE BUTTON */
-#pauseBtn{
-  position:absolute;
-  top:8px;
-  right:8px;
-  width:36px;
-  height:36px;
-  border-radius:50%;
-  background:linear-gradient(135deg,var(--aqua),var(--pink));
-  border:1px solid var(--gold);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:20px;
-  cursor:pointer;
-  z-index:20;
-  box-shadow:0 0 12px rgba(255,255,255,0.7);
-}
-
-/* HELP BUTTON */
-#helpBtn{
-  position:absolute;
-  top:8px;
-  left:8px;
-  width:36px;
-  height:36px;
-  font-size:20px;
-  border-radius:50%;
-  background:linear-gradient(135deg,var(--pink),var(--aqua));
-  border:1px solid var(--gold);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  z-index:20;
-  box-shadow:0 0 12px rgba(255,255,255,0.7);
-}
-
-/* PAUSE OVERLAY */
+/* PAUSE OVERLAY (inside shell) */
 #pauseOverlay{
   position:absolute;
   inset:0;
-  background:rgba(0,0,0,0.55);
+  border-radius:24px;
+  background:rgba(0,0,0,0.6);
   display:none;
   align-items:center;
   justify-content:center;
-  border-radius:24px;
-  font-size:1rem;
+  z-index:25;
+  font-size:0.95rem;
   text-shadow:0 0 6px #fff;
-  z-index:22;
 }
 
-/* HELP OVERLAY */
+/* HELP OVERLAY (inside shell) */
 #helpOverlay{
   position:absolute;
   inset:0;
-  background:rgba(0,0,15,0.75);
+  border-radius:24px;
+  background:rgba(0,0,15,0.8);
   backdrop-filter:blur(6px);
   display:none;
   align-items:center;
   justify-content:center;
   z-index:30;
 }
-
 .help-card{
-  background:radial-gradient(circle,#111827,#020617 60%);
-  padding:18px 22px;
-  border-radius:20px;
   width:88%;
   max-width:380px;
+  padding:18px 20px 16px;
+  border-radius:18px;
+  background:radial-gradient(circle,#111827,#020617 60%);
   border:1px solid rgba(255,255,255,0.25);
   position:relative;
   color:#e5e7eb;
-  text-align:left;
+  font-size:0.8rem;
 }
-
 .help-title{
   font-family:'Cinzel';
   text-align:center;
   font-size:1.1rem;
-  margin-bottom:10px;
+  margin-bottom:8px;
 }
-
 #helpClose{
   position:absolute;
-  top:10px;
-  right:10px;
+  top:8px;
+  right:8px;
   width:26px;
   height:26px;
   border-radius:50%;
   background:linear-gradient(135deg,var(--pink),var(--aqua));
-  font-size:16px;
+  border:1px solid var(--gold);
   display:flex;
   align-items:center;
   justify-content:center;
+  font-size:16px;
   cursor:pointer;
-  border:1px solid var(--gold);
   box-shadow:0 0 8px rgba(255,255,255,0.7);
 }
-
 .help-section{
-  margin:6px 0;
-  font-size:0.85rem;
+  margin-top:6px;
   line-height:1.5;
 }
 
-/* QUESTION OVERLAY */
+/* LEADERBOARD (inside shell) */
+#leaderboardBox{
+  width:100%;
+  margin-top:6px;
+  font-size:0.75rem;
+  text-align:center;
+  color:#e5e7eb;
+}
+
+/* QUESTION OVERLAY (full screen) */
 #questionOverlay{
   position:fixed;
   inset:0;
-  display:none;
   background:rgba(0,0,20,0.82);
   backdrop-filter:blur(8px);
-  justify-content:center;
+  display:none;
   align-items:center;
-  z-index:40;
+  justify-content:center;
+  z-index:50;
 }
 .q-card{
+  width:90%;
+  max-width:400px;
+  border-radius:18px;
+  padding:20px 18px 16px;
   background:radial-gradient(circle,#111827,#020617 60%);
-  padding:20px;
-  border-radius:16px;
-  width:85%;
-  max-width:380px;
   border:1px solid rgba(255,255,255,0.25);
 }
 .q-title{
@@ -262,81 +257,144 @@ h1 span{
   font-size:1.1rem;
   text-align:center;
 }
-.q-sub{text-align:center;margin-bottom:10px;color:#a5b4fc;}
+.q-sub{
+  text-align:center;
+  font-size:0.8rem;
+  color:#a5b4fc;
+  margin-bottom:8px;
+}
+#questionText{
+  font-size:0.85rem;
+  line-height:1.5;
+  margin-bottom:10px;
+}
 #continueBtn{
   width:100%;
-  padding:8px;
-  border-radius:999px;
-  margin-top:12px;
   border:none;
+  border-radius:999px;
+  padding:8px;
+  font-size:0.85rem;
   font-weight:700;
-  background:linear-gradient(135deg,#f97316,#fb7185,#e879f9);
   cursor:pointer;
+  background:linear-gradient(135deg,#f97316,#fb7185,#e879f9);
+}
+
+/* START OVERLAY (full screen) */
+#startOverlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,10,0.85);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:60;
+  text-align:center;
+}
+#startOverlayInner{
+  padding:20px 18px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,0.3);
+  background:radial-gradient(circle,#111827,#020617 60%);
+  box-shadow:0 0 30px rgba(59,130,246,0.8);
+  font-size:0.95rem;
+}
+#startOverlayInner .big{
+  display:block;
+  font-size:1.1rem;
+  margin-bottom:6px;
+}
+
+/* MOBILE SCALE */
+@media(max-width:600px){
+  .shell{
+    transform:scale(0.9);
+  }
 }
 </style>
 </head>
 <body>
 
+<!-- Tap-to-start fullscreen overlay -->
+<div id="startOverlay">
+  <div id="startOverlayInner">
+    <span class="big">画面をタップしてスタート</span>
+    ブロックを動かしてラインを消そう！<br>
+    １０ラインごとにブーハクイズが出てくるよ。
+  </div>
+</div>
+
 <div class="shell">
 
-  <!-- Title -->
   <h1>
     BOOHA TETRIS
     <span>１月のれんしゅう</span>
   </h1>
 
-  <!-- Help + Pause Buttons -->
+  <!-- Top buttons -->
   <div id="helpBtn">？</div>
   <div id="pauseBtn">⏸</div>
 
-  <!-- HUD (JP) -->
-  <div class="hud">
-    <div>ライン数：<span id="linesCount" class="value">0</span></div>
-    <div>次のクイズ：<span id="nextAt" class="next">10</span> ライン目</div>
+  <!-- HUD rows -->
+  <div class="hud-row">
+    <div><span class="label">ライン数：</span><span id="linesCount" class="value">0</span></div>
+    <div><span class="label">次のクイズ：</span><span id="nextAt" class="next">10</span><span class="label"> ライン目</span></div>
+  </div>
+  <div class="hud-row">
+    <div><span class="label">スコア：</span><span id="scoreValue" class="value">0</span></div>
+    <div></div>
   </div>
 
-  <!-- Game Canvas -->
+  <!-- Game canvas -->
   <canvas id="game" width="320" height="640"></canvas>
 
-  <!-- Floating Background Sparkles -->
+  <!-- Sparkles -->
   <div class="sparkle-overlay">
-    <div class="spark" style="left:10%;"></div>
-    <div class="spark" style="left:25%;"></div>
-    <div class="spark" style="left:50%;"></div>
-    <div class="spark" style="left:75%;"></div>
-    <div class="spark" style="left:90%;"></div>
+    <div class="spark" style="left:12%;"></div>
+    <div class="spark" style="left:32%;"></div>
+    <div class="spark" style="left:52%;"></div>
+    <div class="spark" style="left:72%;"></div>
+    <div class="spark" style="left:88%;"></div>
   </div>
 
-  <!-- Pause Overlay -->
+  <!-- Pause overlay -->
   <div id="pauseOverlay">
-    <span>タップしてゲームに戻る</span>
+    <div>タップしてゲームに戻る</div>
   </div>
 
-  <!-- Help Overlay -->
-  <div class="help-section">
-  <strong>English</strong><br>
-  ・Tap on the falling blocks = Rotate<br>
-  ・Press and drag <em>under</em> the blocks = Move left / right<br>
-  ・Drag down under the blocks = Make them fall faster<br>
-  ・Clear lines to get points<br>
-  ・Every 10 lines opens a Booha Question
-</div>
+  <!-- Help overlay -->
+  <div id="helpOverlay">
+    <div class="help-card">
+      <div id="helpClose">✕</div>
+      <div class="help-title">How to Play ／ 遊び方</div>
 
-<div class="help-section">
-  <strong>日本語</strong><br>
-  ・落ちているブロックをタップ → 回転<br>
-  ・ブロックの下の画面を押して左右にドラッグ → 左右に動かす<br>
-  ・ブロックの下で下方向にドラッグ → 速く下に落ちる<br>
-  ・ラインを消すとポイントが入ります<br>
-  ・１０ラインごとに「ブーハクイズ」が開きます
-</div>
+      <div class="help-section">
+        <strong>English</strong><br>
+        ・Tap on the falling blocks = Rotate<br>
+        ・Press and drag <em>under</em> the blocks = Move left / right<br>
+        ・Drag down under the blocks = Make them fall faster<br>
+        ・Clear lines to get points<br>
+        ・Every 10 lines opens a Booha Question
+      </div>
 
+      <div class="help-section">
+        <strong>日本語</strong><br>
+        ・落ちているブロックをタップ → 回転<br>
+        ・ブロックの下の画面を押して左右にドラッグ → 左右に動かす<br>
+        ・ブロックの下で下方向にドラッグ → 速く下に落ちる<br>
+        ・ラインを消すとポイントが入ります<br>
+        ・１０ラインごとに「ブーハクイズ」が開きます
+      </div>
     </div>
   </div>
 
+  <!-- Local leaderboard (inside shell) -->
+  <div id="leaderboardBox">
+    ローカル・ハイスコア：まだありません
+  </div>
+
 </div>
 
-<!-- Question Overlay (Global) -->
+<!-- Question overlay (global) -->
 <div id="questionOverlay">
   <div class="q-card">
     <div class="q-title">Checkpoint</div>
@@ -344,12 +402,12 @@ h1 span{
     <div id="questionText"></div>
     <button id="continueBtn">Continue</button>
   </div>
-</div><script>
+</div>
+<script>
 // =====================
-//  AUDIO
+// AUDIO
 // =====================
 let bgmStarted = false;
-
 const bgm = new Audio("booha-tetris-january.mp3");
 bgm.loop = true;
 bgm.volume = 0.55;
@@ -358,15 +416,13 @@ const sfxClear = new Audio("booha-tetris-sound.mp3");
 sfxClear.volume = 0.9;
 
 function ensureBgm(){
-  if (!bgmStarted) {
-    bgm.play().then(()=>{
-      bgmStarted = true;
-    }).catch(()=>{ /* ignore autoplay errors */ });
+  if(!bgmStarted){
+    bgm.play().then(()=>{ bgmStarted = true; }).catch(()=>{});
   }
 }
 
 // =====================
-//  CANVAS + GLOBALS
+// CANVAS & GLOBALS
 // =====================
 const canvas = document.getElementById("game");
 const context = canvas.getContext("2d");
@@ -379,32 +435,13 @@ let isPausedForQuestion = false;
 
 const linesCountEl = document.getElementById("linesCount");
 const nextAtEl = document.getElementById("nextAt");
+const scoreEl = document.getElementById("scoreValue");
 
 let linesClearedTotal = 0;
 let currentQuestionIndex = 0;
-
-// Score + UI
 let score = 0;
-let scoreEl;
 
-// create a JP score display under the HUD
-(function setupScoreDisplay(){
-  const shell = document.querySelector(".shell");
-  const scoreRow = document.createElement("div");
-  scoreRow.style.width = "100%";
-  scoreRow.style.fontSize = "0.8rem";
-  scoreRow.style.marginTop = "4px";
-  scoreRow.style.display = "flex";
-  scoreRow.style.justifyContent = "flex-start";
-  scoreRow.style.gap = "4px";
-  scoreRow.innerHTML = 'スコア：<span id="scoreValue">0</span>';
-  shell.insertBefore(scoreRow, canvas);
-  scoreEl = scoreRow.querySelector("#scoreValue");
-})();
-
-// =====================
-//  LOCAL LEADERBOARD
-// =====================
+// Leaderboard
 const leaderboardContainer = document.getElementById("leaderboardBox");
 let leaderboardData = [];
 const LEADERBOARD_KEY = "boohaTetrisScores";
@@ -412,14 +449,11 @@ const LEADERBOARD_KEY = "boohaTetrisScores";
 function loadScores(){
   try{
     const raw = localStorage.getItem(LEADERBOARD_KEY);
-    if(raw){
-      leaderboardData = JSON.parse(raw) || [];
-    }
+    if(raw) leaderboardData = JSON.parse(raw) || [];
   }catch(e){
     leaderboardData = [];
   }
 }
-
 function saveScoreToLocal(newScore){
   if(!newScore || isNaN(newScore)) return;
   leaderboardData.push({score:newScore, date:Date.now()});
@@ -430,7 +464,6 @@ function saveScoreToLocal(newScore){
   }catch(e){}
   renderLeaderboard();
 }
-
 function renderLeaderboard(){
   if(!leaderboardContainer) return;
   if(!leaderboardData.length){
@@ -438,31 +471,31 @@ function renderLeaderboard(){
     return;
   }
   let html = "<div>ローカル・ハイスコア</div><div style='margin-top:4px;'>";
-  leaderboardData.forEach((entry, idx)=>{
+  leaderboardData.forEach((entry,idx)=>{
     html += `<div>${idx+1}位：${entry.score} 点</div>`;
   });
   html += "</div>";
   leaderboardContainer.innerHTML = html;
 }
 
-// Placeholder questions
+// Questions
 const questions = Array.from({length:60}, (_,i)=>
   `Question ${i+1} placeholder — January vocab EN/JP here.`
 );
 
 // =====================
-//  PLAYFIELD
+// PLAYFIELD
 // =====================
 const playfield = [];
-for (let row = -2; row < 20; row++){
+for(let row=-2; row<20; row++){
   playfield[row] = [];
-  for (let col = 0; col < 10; col++){
+  for(let col=0; col<10; col++){
     playfield[row][col] = 0;
   }
 }
 
 // =====================
-//  TETROMINOS
+// TETROMINOS
 // =====================
 const tetrominos = {
   "I":[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
@@ -473,7 +506,6 @@ const tetrominos = {
   "Z":[[1,1,0],[0,1,1],[0,0,0]],
   "T":[[0,1,0],[1,1,1],[0,0,0]]
 };
-
 const colors = {
   "I":"#7dd3fc",
   "O":"#facc15",
@@ -485,14 +517,12 @@ const colors = {
 };
 
 // =====================
-//  SEQUENCE + NEXT PIECE
+// SEQUENCE
 // =====================
 const tetrominoSequence = [];
-
 function getRandomInt(min,max){
   return Math.floor(Math.random()*(max-min+1))+min;
 }
-
 function generateSequence(){
   const seq = ['I','J','L','O','S','T','Z'];
   while(seq.length){
@@ -500,20 +530,18 @@ function generateSequence(){
     tetrominoSequence.push(seq.splice(idx,1)[0]);
   }
 }
-
 function getNextTetromino(){
-  if (!tetrominoSequence.length) generateSequence();
+  if(!tetrominoSequence.length) generateSequence();
   const name = tetrominoSequence.pop();
   const matrix = tetrominos[name];
   const col = playfield[0].length/2 - Math.ceil(matrix[0].length/2);
   const row = name === "I" ? -1 : -2;
-  return {name, matrix, row, col};
+  return {name,matrix,row,col};
 }
-
 let tetromino = getNextTetromino();
 
 // =====================
-//  ROTATE & COLLISION
+// ROTATE & COLLISION
 // =====================
 function rotate(matrix){
   const N = matrix.length - 1;
@@ -521,7 +549,6 @@ function rotate(matrix){
     row.map((val,j)=>matrix[N-j][i])
   );
 }
-
 function isValidMove(matrix, cellRow, cellCol){
   for(let r=0; r<matrix.length; r++){
     for(let c=0; c<matrix[r].length; c++){
@@ -541,10 +568,9 @@ function isValidMove(matrix, cellRow, cellCol){
 }
 
 // =====================
-//  PARTICLES (GLITTER)
+// PARTICLES
 // =====================
 const particles = [];
-
 function createSparklesForRow(rowIndex){
   const y = rowIndex*grid + grid/2;
   for(let col=0; col<10; col++){
@@ -553,7 +579,7 @@ function createSparklesForRow(rowIndex){
       const angle = Math.random()*Math.PI*2;
       const speed = Math.random()*2 + 0.5;
       particles.push({
-        x, y,
+        x,y,
         vx:Math.cos(angle)*speed,
         vy:Math.sin(angle)*speed - 0.5,
         life:30+Math.random()*20,
@@ -562,7 +588,6 @@ function createSparklesForRow(rowIndex){
     }
   }
 }
-
 function updateParticles(){
   for(let i=particles.length-1; i>=0; i--){
     const p = particles[i];
@@ -578,41 +603,34 @@ function updateParticles(){
     context.save();
     context.globalAlpha = p.alpha;
     context.fillStyle = "#ffeaa7";
-    context.fillRect(p.x-2, p.y-2, 4,4);
+    context.fillRect(p.x-2,p.y-2,4,4);
     context.restore();
   }
 }
 
 // =====================
-//  HUD + QUESTIONS + SCORE
+// HUD & QUESTIONS & SCORE
 // =====================
 function updateHud(){
-  linesClearedTotal = Math.max(0, linesClearedTotal);
   linesCountEl.textContent = linesClearedTotal;
-  const next = (currentQuestionIndex+1)*10;
-  nextAtEl.textContent = next;
-  if(scoreEl){
-    scoreEl.textContent = score;
-  }
+  nextAtEl.textContent = (currentQuestionIndex+1)*10;
+  scoreEl.textContent = score;
 }
-
-function maybeTriggerQuestion(){
-  const next = (currentQuestionIndex+1)*10;
-  if(linesClearedTotal >= next){
-    showQuestion();
-  }
-}
-
 const questionOverlay = document.getElementById("questionOverlay");
 const questionTextEl = document.getElementById("questionText");
 const continueBtn = document.getElementById("continueBtn");
 
+function maybeTriggerQuestion(){
+  const threshold = (currentQuestionIndex+1)*10;
+  if(linesClearedTotal >= threshold){
+    showQuestion();
+  }
+}
 function showQuestion(){
   isPausedForQuestion = true;
   questionTextEl.textContent = questions[currentQuestionIndex] || "Question placeholder.";
   questionOverlay.style.display = "flex";
 }
-
 continueBtn.onclick = ()=>{
   currentQuestionIndex = Math.min(currentQuestionIndex+1, questions.length);
   questionOverlay.style.display = "none";
@@ -620,13 +638,11 @@ continueBtn.onclick = ()=>{
   updateHud();
 };
 
-// =====================
-//  SCORING TABLE
-// =====================
+// scoring per lines
 const lineScoreTable = [0,100,300,500,800];
 
 // =====================
-//  PLACE TETROMINO + CLEAR LINES
+// PLACE TETROMINO
 // =====================
 function placeTetromino(){
   for(let r=0; r<tetromino.matrix.length; r++){
@@ -644,7 +660,7 @@ function placeTetromino(){
   let cleared = 0;
 
   for(let r=playfield.length-1; r>=0; ){
-    if(playfield[r].every(val=>!!val)){
+    if(playfield[r].every(v=>!!v)){
       createSparklesForRow(r);
       cleared++;
       sfxClear.currentTime = 0;
@@ -655,14 +671,14 @@ function placeTetromino(){
           playfield[rr][cc] = playfield[rr-1]?.[cc] || 0;
         }
       }
-    } else {
+    }else{
       r--;
     }
   }
 
   if(cleared>0){
     linesClearedTotal += cleared;
-    score += lineScoreTable[cleared] || (cleared*100);
+    score += lineScoreTable[cleared] || cleared*100;
     updateHud();
     maybeTriggerQuestion();
   }
@@ -671,10 +687,9 @@ function placeTetromino(){
 }
 
 // =====================
-//  GAME LOOP
+// GAME LOOP
 // =====================
 let frameCount = 0;
-
 function loop(){
   rAF = requestAnimationFrame(loop);
   if(isPaused || isPausedForQuestion || gameOver) return;
@@ -685,7 +700,7 @@ function loop(){
     for(let c=0; c<10; c++){
       const cell = playfield[r][c];
       context.fillStyle = cell ? colors[cell] : "rgba(15,23,42,0.5)";
-      context.fillRect(c*grid, r*grid, grid-1, grid-1);
+      context.fillRect(c*grid,r*grid,grid-1,grid-1);
     }
   }
 
@@ -707,7 +722,7 @@ function loop(){
         context.fillRect(
           (tetromino.col+c)*grid,
           (tetromino.row+r)*grid,
-          grid-1, grid-1
+          grid-1,grid-1
         );
       }
     }
@@ -715,13 +730,13 @@ function loop(){
 }
 
 // =====================
-//  TOUCH CONTROLS (NEW)
-//  - Tap ON piece: rotate
-//  - Press & drag UNDER piece: move + drop
+// TOUCH CONTROLS
+//  tap on piece -> rotate
+//  drag under piece -> move + drop
 // =====================
-let pointerMode = null; // "rotate" or "drag"
-let startX = 0, startY = 0;
-let lastDragX = 0, lastDragY = 0;
+let pointerMode = null; // 'rotate' or 'drag'
+let lastDragX = 0;
+let lastDragY = 0;
 
 function getPieceBounds(){
   let left = Infinity, right = -Infinity, top = Infinity, bottom = -Infinity;
@@ -729,17 +744,17 @@ function getPieceBounds(){
     for(let c=0; c<tetromino.matrix[r].length; c++){
       if(tetromino.matrix[r][c]){
         const drawRow = tetromino.row + r;
-        if(drawRow < 0) continue; // offscreen
-        const x = (tetromino.col + c) * grid;
-        const y = drawRow * grid;
-        left = Math.min(left, x);
-        right = Math.max(right, x + grid);
-        top = Math.min(top, y);
-        bottom = Math.max(bottom, y + grid);
+        if(drawRow < 0) continue;
+        const x = (tetromino.col+c)*grid;
+        const y = drawRow*grid;
+        left = Math.min(left,x);
+        right = Math.max(right,x+grid);
+        top = Math.min(top,y);
+        bottom = Math.max(bottom,y+grid);
       }
     }
   }
-  if(left === Infinity){
+  if(left===Infinity){
     return {left:0,right:0,top:0,bottom:0};
   }
   return {left,right,top,bottom};
@@ -754,25 +769,20 @@ canvas.addEventListener("touchstart", e=>{
   const cy = t.clientY - rect.top;
 
   const bounds = getPieceBounds();
-  startX = cx;
-  startY = cy;
 
-  // touch on the blocks → rotate mode
-  if(cx >= bounds.left && cx <= bounds.right &&
-     cy >= bounds.top && cy <= bounds.bottom){
+  if(cx>=bounds.left && cx<=bounds.right && cy>=bounds.top && cy<=bounds.bottom){
     pointerMode = "rotate";
-  } else if (cy > bounds.bottom + grid*0.3) {
-    // touch clearly under the piece → drag mode
+  }else if(cy > bounds.bottom + grid*0.3){
     pointerMode = "drag";
     lastDragX = cx;
     lastDragY = cy;
-  } else {
+  }else{
     pointerMode = null;
   }
-}, {passive:false});
+},{passive:false});
 
 canvas.addEventListener("touchmove", e=>{
-  if(pointerMode !== "drag" || gameOver || isPaused || isPausedForQuestion) return;
+  if(pointerMode!=="drag" || gameOver || isPaused || isPausedForQuestion) return;
   e.preventDefault();
   const rect = canvas.getBoundingClientRect();
   const t = e.touches[0];
@@ -782,7 +792,6 @@ canvas.addEventListener("touchmove", e=>{
   const dx = cx - lastDragX;
   const dy = cy - lastDragY;
 
-  // horizontal move: every ~16px = 1 column
   if(Math.abs(dx) > 16){
     const dir = dx > 0 ? 1 : -1;
     const newCol = tetromino.col + dir;
@@ -792,29 +801,19 @@ canvas.addEventListener("touchmove", e=>{
     lastDragX = cx;
   }
 
-  // vertical drag: pull piece down faster
   if(dy > 16){
     const newRow = tetromino.row + 1;
     if(isValidMove(tetromino.matrix, newRow, tetromino.col)){
       tetromino.row = newRow;
-    } else {
-      // landed while dragging
+    }else{
       placeTetromino();
     }
     lastDragY = cy;
   }
-}, {passive:false});
+},{passive:false});
 
 canvas.addEventListener("touchend", e=>{
-  if(gameOver || isPaused || isPausedForQuestion) {
-    pointerMode = null;
-    return;
-  }
-  if(pointerMode === "rotate"){
-    const dx = 0; // we can use distance to avoid accidental drags if needed
-    const dy = 0;
-    const dist = Math.hypot(dx, dy); // simplified; we already filtered huge moves
-    // treat it as a tap
+  if(pointerMode==="rotate" && !gameOver && !isPaused && !isPausedForQuestion){
     const rotated = rotate(tetromino.matrix);
     if(isValidMove(rotated, tetromino.row, tetromino.col)){
       tetromino.matrix = rotated;
@@ -824,7 +823,7 @@ canvas.addEventListener("touchend", e=>{
 });
 
 // =====================
-//  KEYBOARD (DESKTOP)
+// KEYBOARD (DESKTOP)
 // =====================
 document.addEventListener("keydown", e=>{
   ensureBgm();
@@ -832,26 +831,26 @@ document.addEventListener("keydown", e=>{
 
   if(e.key==="ArrowLeft"){
     const nc = tetromino.col - 1;
-    if(isValidMove(tetromino.matrix, tetromino.row, nc)) tetromino.col = nc;
+    if(isValidMove(tetromino.matrix,tetromino.row,nc)) tetromino.col = nc;
   }
   if(e.key==="ArrowRight"){
     const nc = tetromino.col + 1;
-    if(isValidMove(tetromino.matrix, tetromino.row, nc)) tetromino.col = nc;
+    if(isValidMove(tetromino.matrix,tetromino.row,nc)) tetromino.col = nc;
   }
   if(e.key==="ArrowUp"){
     const rot = rotate(tetromino.matrix);
-    if(isValidMove(rot, tetromino.row, tetromino.col)) tetromino.matrix = rot;
+    if(isValidMove(rot,tetromino.row,tetromino.col)) tetromino.matrix = rot;
   }
   if(e.key==="ArrowDown"){
     const nr = tetromino.row + 1;
-    if(isValidMove(tetromino.matrix, nr, tetromino.col)){
+    if(isValidMove(tetromino.matrix,nr,tetromino.col)){
       tetromino.row = nr;
     }
   }
 });
 
 // =====================
-//  PAUSE SYSTEM
+// PAUSE
 // =====================
 const pauseBtn = document.getElementById("pauseBtn");
 const pauseOverlay = document.getElementById("pauseOverlay");
@@ -869,12 +868,12 @@ function resumeGame(){
 
 pauseBtn.onclick = ()=>{
   ensureBgm();
-  if(isPaused){ resumeGame(); } else { pauseGame(); }
+  if(isPaused) resumeGame(); else pauseGame();
 };
 pauseOverlay.onclick = resumeGame;
 
 // =====================
-//  HELP SYSTEM
+// HELP
 // =====================
 const helpBtn = document.getElementById("helpBtn");
 const helpOverlay = document.getElementById("helpOverlay");
@@ -891,41 +890,46 @@ helpClose.onclick = ()=>{
 };
 
 // =====================
-//  GAME OVER
+// GAME OVER
 // =====================
 function showGameOver(){
   if(gameOver) return;
   gameOver = true;
   cancelAnimationFrame(rAF);
-
   saveScoreToLocal(score);
 
   context.fillStyle = "rgba(0,0,0,0.7)";
-  context.fillRect(0, canvas.height/2-40, canvas.width, 80);
+  context.fillRect(0,canvas.height/2-40,canvas.width,80);
 
   context.fillStyle = "#fff";
   context.font = "28px Cinzel";
   context.textAlign = "center";
-  context.fillText("GAME OVER", canvas.width/2, canvas.height/2);
+  context.fillText("GAME OVER",canvas.width/2,canvas.height/2);
 }
 
 // =====================
-//  INIT + TAP-TO-START
+// INIT + TAP-TO-START
 // =====================
 loadScores();
 renderLeaderboard();
 updateHud();
 
+const startOverlay = document.getElementById("startOverlay");
 let gameStarted = false;
 
 function startGame(){
   if(gameStarted) return;
   gameStarted = true;
   ensureBgm();
+  startOverlay.style.display = "none";
   rAF = requestAnimationFrame(loop);
 }
 
-const shellEl = document.querySelector(".shell");
-shellEl.addEventListener("touchstart", startGame);
-shellEl.addEventListener("mousedown", startGame);
+startOverlay.addEventListener("click", startGame);
+startOverlay.addEventListener("touchstart", function(e){
+  e.preventDefault();
+  startGame();
+},{passive:false});
 </script>
+</body>
+</html>
