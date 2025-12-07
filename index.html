@@ -568,8 +568,8 @@ function fitShellToViewport(){
 
   const rect = shell.getBoundingClientRect();
 
-  // Extra space for URL bar + gesture bar so buttons never touch the edge
-  const safePadding = 96; // px
+  // Big safety margin for URL bar + bottom gesture bar
+  const safePadding = 160; // px – plenty of room so the D-pad never gets cut
   const available = window.innerHeight - safePadding;
 
   // Only shrink, never enlarge
@@ -581,11 +581,11 @@ function fitShellToViewport(){
 // Run scaling on load + resize + rotation (with a small delay for browser chrome)
 window.addEventListener("load", () => {
   fitShellToViewport();
-  setTimeout(fitShellToViewport, 150);
+  setTimeout(fitShellToViewport, 200);
 });
 window.addEventListener("resize", fitShellToViewport);
 window.addEventListener("orientationchange", () => {
-  setTimeout(fitShellToViewport, 150);
+  setTimeout(fitShellToViewport, 200);
 });
 
 let rAF = null;
