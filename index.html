@@ -212,7 +212,30 @@
     80%{opacity:1;}
     100%{transform:translate3d(0,-40%,0) scale(1.05); opacity:0;}
   }
+  /* LINE CLEAR FLASH – color changes by number of lines */
+  .line-flash{
+    position:absolute;
+    inset:0;
+    border-radius:24px;
+    pointer-events:none;
+    opacity:0;
+    mix-blend-mode:screen;
+    transition:opacity 0.2s ease-out;
+  }
+  .line-flash.flash-1{
+    background:radial-gradient(circle at center, rgba(74,222,128,0.7) 0%, transparent 65%);
+  }
+  .line-flash.flash-2{
+    background:radial-gradient(circle at center, rgba(59,130,246,0.8) 0%, transparent 65%);
+  }
+  .line-flash.flash-3{
+    background:radial-gradient(circle at center, rgba(249,115,22,0.85) 0%, transparent 70%);
+  }
+  .line-flash.flash-4{
+    background:radial-gradient(circle at center, rgba(225,29,72,0.95) 0%, transparent 70%);
+  }
 
+    
   /* MOBILE / TABLET BUTTON PAD */
   #mobileControls,
   #mobileDownRow{
@@ -475,24 +498,33 @@
   </div>
 
   <!-- HELP OVERLAY -->
-<div class="help-text">
-  <h3>遊び方 / How to Play</h3>
+  <div id="helpOverlay">
+    <div class="help-card">
+      <div id="helpClose">✕</div>
+      <div class="help-title">How to Play ／ 遊び方</div>
 
-  <p>● 左 ← と 右 → ボタンでブロックを動かす。</p>
-  <p>● ピンクの回転ボタンでブロックを回す。</p>
-  <p>● 下 ボタンを「タップ」すると1マス下に落ちる。</p>
-  <p>● 下 ボタンを「長押し」すると、すばやく落ちる（ソフトドロップ）。</p>
+      <div class="help-text">
+        <p>● 左 ← と 右 → ボタンでブロックを動かす。</p>
+        <p>● ピンクの回転ボタンでブロックを回す。</p>
+        <p>● 下 ボタンを「タップ」すると1マス下に落ちる。</p>
+        <p>● 下 ボタンを「長押し」すると、すばやく落ちる（ソフトドロップ）。</p>
 
-  <br>
+        <br>
 
-  <p>● Use ← and → to move the block.</p>
-  <p>● Use the pink button to rotate the block.</p>
-  <p>● Tap the ↓ button to drop 1 square.</p>
-  <p>● Hold the ↓ button to accelerate the fall (soft-drop).</p>
+        <p>● Use ← and → to move the block.</p>
+        <p>● Use the pink button to rotate the block.</p>
+        <p>● Tap the ↓ button to drop 1 square.</p>
+        <p>● Hold the ↓ button to accelerate the fall (soft-drop).</p>
 
-  <br>
-  <p>10ラインごとにクイズが出るよ！</p>
-</div>
+        <br>
+        <p>10ラインごとにクイズが出るよ！</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- LINE CLEAR FLASH LAYER -->
+  <div id="lineFlash" class="line-flash"></div>
+
 
 
   <!-- LEADERBOARD POPUP -->
@@ -772,7 +804,20 @@ function updateParticles(){
     context.restore();
   }
 }
+// =====================
+// LINE CLEAR FLASH
+// =====================
+const lineFlashEl = document.getElementById("lineFlash");
 
+function triggerLineFlash(lines){
+  if(!lineFlashEl) return;
+  const level = Math.min(lines, 4); // 1〜4 lines
+  lineFlashEl.classList.remove("flash-1","flash-2","flash-3","flash-4");
+  lineFlashEl.classList.add("flash-" + level);
+  lineFlashEl.style.opacity = "1";
+  setTimeout(()=>{ lineFlashEl.style.opacity = "0"; }, 150);
+}
+  
 // =====================
 // HUD & QUESTIONS & SCORE
 // =====================
@@ -845,9 +890,11 @@ function placeTetromino(){
   if(cleared>0){
     linesClearedTotal += cleared;
     score += lineScoreTable[cleared] || cleared*10;
+    triggerLineFlash(cleared);     // 🔆 new glow!
     updateHud();
     maybeTriggerQuestion();
   }
+
 
   tetromino = getNextTetromino();
 }
@@ -960,50 +1007,49 @@ function attachControl(btn, handler){
 attachControl(moveLeftBtn,  moveLeft);
 attachControl(moveRightBtn, moveRight);
 attachControl(rotateBtn,    rotatePiece);
-attachControl(moveDownBtn,  softDrop);
 
 // =====================
-// MOBILE: DOWN BUTTON
+// MOBILE: DOWN BUTTON (tap = 1 step, hold = fast)
 // =====================
-const downBtn = document.getElementById("downBtn");
+let downHold = false;
+let downTimer = null;
 
-let holdingDown = false;
-let downInterval = null;
+if (moveDownBtn){
+  // Tap → one soft drop
+  moveDownBtn.addEventListener("click", () => {
+    if(!gameStarted || gameOver || isPaused || isPausedForQuestion) return;
+    softDrop();
+  });
 
-downBtn.addEventListener("touchstart", () => {
-  if (!tetromino || isPaused || isPausedForQuestion || gameOver) return;
+  // Hold → continuous fast soft drop
+  moveDownBtn.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    if(!gameStarted || gameOver || isPaused || isPausedForQuestion) return;
 
-  holdingDown = true;
+    downHold = true;
+    softDrop(); // immediate step
 
-  // Drop once immediately
-  softDropOnce();
+    downTimer = setInterval(() => {
+      if(!downHold) return;
+      softDrop();
+    }, 60); // faster = lower number
+  }, {passive:false});
 
-  // Start accelerated soft drop
-  downInterval = setInterval(() => {
-    if (holdingDown) {
-      softDropOnce(true);  // true = faster
+  moveDownBtn.addEventListener("touchend", () => {
+    downHold = false;
+    if(downTimer){
+      clearInterval(downTimer);
+      downTimer = null;
     }
-  }, 50); // every 50ms for fast fall
-});
+  });
 
-downBtn.addEventListener("touchend", () => {
-  holdingDown = false;
-  clearInterval(downInterval);
-});
-
-function softDropOnce(fast = false) {
-  const row = tetromino.row + 1;
-
-  // Same logic as DOWN key
-  if (!isValidMove(tetromino.matrix, row, tetromino.col)) {
-    tetromino.row = row - 1;
-    placeTetromino();
-    return;
-  }
-
-  // fall speed
-  tetromino.row = row;
-  if (fast) count = 0; // forces fall loop sync
+  moveDownBtn.addEventListener("touchcancel", () => {
+    downHold = false;
+    if(downTimer){
+      clearInterval(downTimer);
+      downTimer = null;
+    }
+  });
 }
 
 
