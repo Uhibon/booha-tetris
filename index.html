@@ -26,7 +26,7 @@
   align-items:flex-start;
   justify-content:center;
   padding-top:4vh;      /* pushes everything downward */
-  padding-bottom:4vh;   /* adds breathing room at bottom */
+  padding-bottom:4vh;   /* base breathing room at bottom */
   background:
     radial-gradient(circle at top, #1f2937 0%, #020617 55%, #000000 100%);
   font-family:'Noto Sans JP', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -45,6 +45,18 @@
   flex-direction:column;
   align-items:center;
   gap:10px;
+}
+
+/* 🧷 iPhone Safari bottom bar fix: keep the down button above the bar */
+@supports (-webkit-touch-callout:none) {
+  body{
+    padding-bottom:calc(4vh + env(safe-area-inset-bottom, 0px));
+  }
+
+  .shell{
+    padding-bottom:calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+}
 
   /* responsive width */
   width:min(480px, 100vw - 24px);
