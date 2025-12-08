@@ -475,31 +475,25 @@
   </div>
 
   <!-- HELP OVERLAY -->
-  <div id="helpOverlay">
-    <div class="help-card">
-      <div id="helpClose">✕</div>
+<div class="help-text">
+  <h3>遊び方 / How to Play</h3>
 
-      <div class="help-title">How to Play ／ 遊び方</div>
+  <p>● 左 ← と 右 → ボタンでブロックを動かす。</p>
+  <p>● ピンクの回転ボタンでブロックを回す。</p>
+  <p>● 下 ボタンを「タップ」すると1マス下に落ちる。</p>
+  <p>● 下 ボタンを「長押し」すると、すばやく落ちる（ソフトドロップ）。</p>
 
-      <div class="help-section">
-        <strong>English</strong><br>
-        ・Tap the rotate button to rotate<br>
-        ・Use the ← → buttons to move<br>
-        ・Use the ↓ button to soft drop<br>
-        ・Clear lines to score points<br>
-        ・Every 10 lines opens a Booha Question
-      </div>
+  <br>
 
-      <div class="help-section">
-        <strong>日本語</strong><br>
-        ・回転ボタンをタップ → 回転<br>
-        ・← → ボタン → 左右に動かす<br>
-        ・↓ ボタン → 下に落とす<br>
-        ・ラインを消すとポイントが入る<br>
-        ・１０ラインごとに「ブーハクイズ」が出る
-      </div>
-    </div>
-  </div>
+  <p>● Use ← and → to move the block.</p>
+  <p>● Use the pink button to rotate the block.</p>
+  <p>● Tap the ↓ button to drop 1 square.</p>
+  <p>● Hold the ↓ button to accelerate the fall (soft-drop).</p>
+
+  <br>
+  <p>10ラインごとにクイズが出るよ！</p>
+</div>
+
 
   <!-- LEADERBOARD POPUP -->
   <div id="leaderboardOverlay">
@@ -967,6 +961,51 @@ attachControl(moveLeftBtn,  moveLeft);
 attachControl(moveRightBtn, moveRight);
 attachControl(rotateBtn,    rotatePiece);
 attachControl(moveDownBtn,  softDrop);
+
+// =====================
+// MOBILE: DOWN BUTTON
+// =====================
+const downBtn = document.getElementById("downBtn");
+
+let holdingDown = false;
+let downInterval = null;
+
+downBtn.addEventListener("touchstart", () => {
+  if (!tetromino || isPaused || isPausedForQuestion || gameOver) return;
+
+  holdingDown = true;
+
+  // Drop once immediately
+  softDropOnce();
+
+  // Start accelerated soft drop
+  downInterval = setInterval(() => {
+    if (holdingDown) {
+      softDropOnce(true);  // true = faster
+    }
+  }, 50); // every 50ms for fast fall
+});
+
+downBtn.addEventListener("touchend", () => {
+  holdingDown = false;
+  clearInterval(downInterval);
+});
+
+function softDropOnce(fast = false) {
+  const row = tetromino.row + 1;
+
+  // Same logic as DOWN key
+  if (!isValidMove(tetromino.matrix, row, tetromino.col)) {
+    tetromino.row = row - 1;
+    placeTetromino();
+    return;
+  }
+
+  // fall speed
+  tetromino.row = row;
+  if (fast) count = 0; // forces fall loop sync
+}
+
 
 // =====================
 // PAUSE
