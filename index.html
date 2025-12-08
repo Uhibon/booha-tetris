@@ -21,14 +21,18 @@
     width:100%;
     overflow:hidden;
   }
-  body{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:radial-gradient(circle at top,#1f2937 0%,#020617 55%,#000 100%);
-    font-family:'Noto Sans JP',system-ui,sans-serif;
-    color:#f9fafb;
-  }
+ body{
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding-top:4vh;      /* pushes everything downward */
+  padding-bottom:4vh;   /* adds breathing room at bottom */
+  background:
+    radial-gradient(circle at top, #1f2937 0%, #020617 55%, #000000 100%);
+  font-family:'Noto Sans JP', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color:#f9fafb;
+  overflow:hidden;
+}
 
 /* PHONE SHELL – width by device, height by viewport, can scale on short screens */
 .shell{
